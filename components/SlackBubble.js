@@ -1,6 +1,3 @@
-/* eslint-disable no-underscore-dangle, no-use-before-define */
-
-import PropTypes from "prop-types";
 import React from "react";
 import {
   Text,
@@ -8,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  ViewPropTypes,
   Platform,
 } from "react-native";
 
@@ -254,12 +250,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "baseline",
   },
-  /* eslint-disable react-native/no-color-literals */
   tick: {
     backgroundColor: "transparent",
-    color: "white",
+    color: "#FFFFFF",
   },
-  /* eslint-enable react-native/no-color-literals */
   tickView: {
     flexDirection: "row",
   },
@@ -269,62 +263,3 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
 });
-
-Bubble.contextTypes = {
-  actionSheet: PropTypes.func,
-};
-
-Bubble.defaultProps = {
-  touchableProps: {},
-  onLongPress: null,
-  renderMessageImage: null,
-  renderMessageText: null,
-  renderCustomView: null,
-  renderTime: null,
-  currentMessage: {
-    text: null,
-    createdAt: null,
-    image: null,
-  },
-  nextMessage: {},
-  previousMessage: {},
-  containerStyle: {},
-  wrapperStyle: {},
-  tickStyle: {},
-  containerToNextStyle: {},
-  containerToPreviousStyle: {},
-};
-
-Bubble.propTypes = {
-  touchableProps: PropTypes.object,
-  onLongPress: PropTypes.func,
-  renderMessageImage: PropTypes.func,
-  renderMessageText: PropTypes.func,
-  renderCustomView: PropTypes.func,
-  renderUsername: PropTypes.func,
-  renderTime: PropTypes.func,
-  renderTicks: PropTypes.func,
-  currentMessage: PropTypes.object,
-  nextMessage: PropTypes.object,
-  previousMessage: PropTypes.object,
-  user: PropTypes.object,
-  containerStyle: PropTypes.shape({
-    left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
-  }),
-  wrapperStyle: PropTypes.shape({
-    left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
-  }),
-  messageTextStyle: Text.propTypes.style,
-  usernameStyle: Text.propTypes.style,
-  tickStyle: Text.propTypes.style,
-  containerToNextStyle: PropTypes.shape({
-    left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
-  }),
-  containerToPreviousStyle: PropTypes.shape({
-    left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
-  }),
-};
