@@ -4,6 +4,9 @@ import { StatusBar, StyleSheet, View, Text, Dimensions } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import * as Location from "expo-location";
 
+import firebase from "firebase";
+// import "@firebase/firestore";
+
 // import * as Font from "expo-font";
 
 import { setCustomText, setCustomTextInput } from "react-native-global-props";
@@ -13,9 +16,23 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Chat from "./screens/Chat";
 import Loading from "./screens/Loading";
 
+// init reactn store
 setGlobal({
   location: null,
 });
+
+// init firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDlWJhtsk4HIeLU_2KeoP3IQhGufKGspMQ",
+  authDomain: "quibble-14b59.firebaseapp.com",
+  databaseURL: "https://quibble-14b59.firebaseio.com",
+  projectId: "quibble-14b59",
+  storageBucket: "quibble-14b59.appspot.com",
+  messagingSenderId: "90065254796",
+  appId: "1:90065254796:web:7987ad25399f30134b3ea9",
+};
+
+firebase.initializeApp(firebaseConfig);
 
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);

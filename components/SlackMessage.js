@@ -1,8 +1,6 @@
 /* eslint-disable no-underscore-dangle, no-use-before-define */
-
-import PropTypes from "prop-types";
 import React from "react";
-import { View, ViewPropTypes, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 import { Avatar, Day, utils } from "react-native-gifted-chat";
 import Bubble from "./SlackBubble";
@@ -111,18 +109,4 @@ Message.defaultProps = {
   previousMessage: {},
   user: {},
   containerStyle: {},
-};
-
-Message.propTypes = {
-  renderAvatar: PropTypes.func,
-  renderBubble: PropTypes.func,
-  renderDay: PropTypes.func,
-  currentMessage: PropTypes.object,
-  nextMessage: PropTypes.object,
-  previousMessage: PropTypes.object,
-  user: PropTypes.object,
-  containerStyle: PropTypes.shape({
-    left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
-  }),
 };
