@@ -3,9 +3,10 @@ import React, { useState, useEffect, useGlobal, setGlobal } from "reactn";
 import { StatusBar, StyleSheet, View, Text, Dimensions } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import * as Location from "expo-location";
+import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 
-import firebase from "firebase";
-// import "@firebase/firestore";
+import firebase from "firebase/app";
+import "firebase/auth";
 
 // import * as Font from "expo-font";
 
@@ -14,11 +15,13 @@ import { setCustomText, setCustomTextInput } from "react-native-global-props";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import Chat from "./screens/Chat";
-import Loading from "./screens/Loading";
+// import Loading from "./screens/Loading";
+import Auth from "./screens/Auth";
 
 // init reactn store
 setGlobal({
   location: null,
+  user: null,
 });
 
 // init firebase
@@ -33,11 +36,14 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+firebase.auth().useDeviceLanguage();
 
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
-  const [location, setLocation] = useGlobal("location");
   const [errorMsg, setErrorMsg] = useState(null);
+
+  const [location, setLocation] = useGlobal("location");
+  const [user] = useGlobal("user");
 
   const [, setDimensions] = useState({
     width: Dimensions.get("window").width,
@@ -123,9 +129,7 @@ export default function App(props) {
   };
 
   if (errorMsg) {
-    console.log(errorMsg);
-  } else if (location) {
-    console.log(JSON.stringify(location, null, 2));
+    console.error(errorMsg);
   }
 
   // don't return anything if not ready, this way we display the loading screen longer
@@ -138,7 +142,7 @@ export default function App(props) {
       <StatusBar barStyle="dark-content" />
       <SafeAreaProvider>
         <SafeAreaView style={styles.container}>
-          {location ? <Chat /> : <Loading />}
+          {user && location ? <Chat /> : <Auth />}
         </SafeAreaView>
       </SafeAreaProvider>
     </View>
