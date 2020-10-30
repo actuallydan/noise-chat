@@ -1,5 +1,5 @@
 import React, { useEffect, useGlobal } from "reactn";
-import { Platform, TouchableOpacity, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import firebase from "firebase/app";
 import "firebase/auth";
 import randomName from "../utils/getRandomName";
@@ -31,12 +31,13 @@ export default function Auth() {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         // User is signed in.
-        var uid = user.uid;
+        const uid = user.uid;
+        const name = randomName();
 
         setUser({
           id: uid,
-          name: randomName(),
-          avatar: `https://avatars.dicebear.com/api/gridy/${user.uid}.svg`,
+          name,
+          avatar: `https://avatars.dicebear.com/api/gridy/${name}.svg`,
         });
       } else {
         // User is signed out.
