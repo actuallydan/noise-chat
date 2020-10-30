@@ -1,15 +1,17 @@
-# YakYik
+# Quibble
 
-A YikYak if instead of being hyperlocal Reddit, it was just a hyperlocal chatroom.
+A YikYak clone if, instead of being hyperlocal Reddit, it was just a hyperlocal chatroom.
 
 Purely just a project to work on an end-to-end publishing something to Android/iOS app store.
+
+![Demo](./assets-for-readme/quibble-alpha.gif)
 
 # Installation
 
 Being built with Expo, this project requires the latest `expo-cli` with `npm install -g expo-cli`
 
 ```
-git clone https://github.com/actuallydan/yak-yik.git
+git clone https://github.com/actuallydan/quibble.git
 npm install
 ```
 
@@ -56,7 +58,7 @@ Commit messages should (try to) follow Angular style commit header.
 Example:
 
 ```
-git checkout -b feature/dkral/images
+git checkout -b feature/actuallydan/images
 git add .
 git commit -m 'feat(images): add new splash image'
 git pull --rebase origin main
