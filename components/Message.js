@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Platform, Image } from "react-native";
 import Day from "./Day";
 import dayjs from "dayjs";
 import { SvgUri } from "react-native-svg";
@@ -41,10 +41,17 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
       <View style={styles.messageAvatarAndContentWrapper}>
         {showAvatar ? (
           <View style={styles.avatarWrapper}>
-            <SvgUri
-              uri={currentMessage.user.avatar}
-              style={styles.messageAvatar}
-            />
+            {Platform.OS === "web" ? (
+              <Image
+                source={{ uri: currentMessage.user.avatar }}
+                style={styles.messageAvatar}
+              />
+            ) : (
+              <SvgUri
+                uri={currentMessage.user.avatar}
+                style={styles.messageAvatar}
+              />
+            )}
           </View>
         ) : (
           <View style={styles.avatarWrapperEmpty} />
