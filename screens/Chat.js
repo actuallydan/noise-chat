@@ -5,7 +5,8 @@ import emojiUtils from "emoji-utils";
 
 import firebase from "firebase/app";
 import "@firebase/firestore";
-
+import flatten from "lodash.flatten";
+import dayjs from "dayjs";
 import SlackMessage from "../components/SlackMessage";
 import Message from "../components/Message";
 
@@ -38,61 +39,52 @@ export default function Chat() {
       .sort();
   }
 
+  // Boy howdy this bit is DENSE
+  useEffect(() => {
+    // Get all the messages as an object of {tileId: messages[], tileId:message[]}
+    // Flatten them with lodash because CoreJS doesn't have flat() :eyeroll
+    const flattenedTempMessages = flatten(Object.values(messagesObj));
+
+    // Sort them by unix timestamp
+    const sortedMessages = flattenedTempMessages.sort(
+      (a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf()
+    );
+
+    // Update our messages array
+    GiftedChat.append([], sortedMessages);
+    setMessages(sortedMessages);
+  }, [messagesObj]);
+
   useEffect(() => {
     // setup listen hook for queries in firestore +/- 1 lat long minute
     const arrOfLocs = getArrOfDocs(latLongID);
-    const tempObjOfMessages = {};
-    arrOfLocs.forEach((loc) => {
-      firebase
+
+    // The return value should be an array of unsubscribe functions
+    const unsubs = arrOfLocs.map((loc) => {
+      return firebase
         .firestore()
         .collection(`/messages/${loc}/list`)
         .orderBy("createdAt", "desc")
         .limit(50)
         .onSnapshot((querySnapshot) => {
-          tempObjOfMessages[loc] = [];
+          let msgs = [];
 
           if (querySnapshot) {
             querySnapshot.forEach((doc) => {
-              tempObjOfMessages[loc].push(doc.data());
+              msgs.push(doc.data());
             });
           }
-        });
 
-      setMessagesObj(tempObjOfMessages);
+          // Since the docs resolve to data asynchronously, use the resolver pattern to not overwrite other updates
+          setMessagesObj((oldMessagesObj) => ({
+            ...oldMessagesObj,
+            [loc]: msgs,
+          }));
+        });
     });
 
-    // listen for updates to resource in question
-    ref
-      .orderBy("createdAt", "desc")
-      .limit(50)
-      .onSnapshot((querySnapshot) => {
-        // querySnapshot is an array of documents
-        // TODO
-        // querySnapshot can be undefined, fruutratingly
-        if (querySnapshot) {
-          let msgs = [];
-          querySnapshot.forEach((doc) => {
-            // console.log(doc.data());
-            msgs.push(doc.data());
-          });
-
-          GiftedChat.append([], msgs);
-          setMessages(msgs);
-        }
-      });
-
-    // setMessages([
-    //   {
-    //     _id: 1,
-    //     text: "Hello developer!!!",
-    //     createdAt: new Date().toJSON(),
-    //     user: {
-    //       _id: 2,
-    //       name: "React Native",
-    //       avatar: "https://placeimg.com/140/140/any",
-    //     },
-    //   },
-    // ]);
+    // I'm not totally sure this works this way, but try to unsub from all the listeners at once?
+    return () => unsubs.forEach((u) => u());
   }, []);
 
   function uuidv4() {
@@ -160,7 +152,7 @@ export default function Chat() {
     );
   }
 
-  console.log(messagesObj);
+  // console.log(messagesObj);
   return (
     <GiftedChat
       messages={messages}

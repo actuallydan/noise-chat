@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Platform, Image } from "react-native";
 import Day from "./Day";
 import dayjs from "dayjs";
 import { SvgUri } from "react-native-svg";
@@ -32,25 +32,40 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
       {showDay && (
         <Day text={new Date(currentMessage.createdAt).toLocaleDateString()} />
       )}
-      {showAvatar && (
-        <View style={styles.userAndTimeWrapper}>
-          <Text style={styles.messageUserText}>{currentMessage.user.name}</Text>
-          <Text style={styles.timestamp}>{timestamp}</Text>
-        </View>
-      )}
-      <View style={styles.messageAvatarAndContentWrapper}>
+      <View
+        style={[
+          styles.messageAvatarAndContentWrapper,
+          showAvatar ? { marginTop: 5 } : {},
+        ]}
+      >
         {showAvatar ? (
           <View style={styles.avatarWrapper}>
-            <SvgUri
-              uri={currentMessage.user.avatar}
-              style={styles.messageAvatar}
-            />
+            {Platform.OS === "web" ? (
+              <Image
+                source={{ uri: currentMessage.user.avatar }}
+                style={styles.messageAvatar}
+              />
+            ) : (
+              <SvgUri
+                uri={currentMessage.user.avatar}
+                style={styles.messageAvatar}
+              />
+            )}
           </View>
         ) : (
           <View style={styles.avatarWrapperEmpty} />
         )}
-
-        <Text style={styles.messageText}>{currentMessage.text}</Text>
+        <View>
+          {showAvatar && (
+            <View style={styles.userAndTimeWrapper}>
+              <Text style={styles.messageUserText}>
+                {currentMessage.user.name}
+              </Text>
+              <Text style={styles.timestamp}>{timestamp}</Text>
+            </View>
+          )}
+          <Text style={styles.messageText}>{currentMessage.text}</Text>
+        </View>
       </View>
     </View>
   );
@@ -73,23 +88,16 @@ const styles = StyleSheet.create({
   },
   userAndTimeWrapper: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "center",
     marginVertical: 5,
   },
-  // me: {
-  //   backgroundColor: "#2f3242",
-  // },
-  // otherUser: {
-  //   backgroundColor: "#3a3e52",
-  // },
   messageWrapper: {
     marginHorizontal: 15,
-    // marginTop: 5,
-    // marginBottom: 10,
   },
   messageUserText: {
     color: "#000000",
     fontSize: 18,
+    fontWeight: "bold",
   },
   avatarWrapper: {
     height: 40,
@@ -110,13 +118,14 @@ const styles = StyleSheet.create({
   messageText: {
     color: "#000000",
     paddingVertical: 0,
-    paddingHorizontal: 15,
+    paddingRight: 15,
 
     fontSize: 15,
   },
   timestamp: {
     color: "#000000b7",
-    fontSize: 12,
+    fontWeight: "300",
+    fontSize: 14,
     marginLeft: 10,
   },
 });

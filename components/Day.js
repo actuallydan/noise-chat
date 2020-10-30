@@ -9,7 +9,6 @@ export default function Day({
   textStyle = {},
   textProps = {},
 }) {
-  console.log(text);
   return (
     <View style={[styles.container, containerStyle]}>
       <View style={wrapperStyle}>
