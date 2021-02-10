@@ -1,8 +1,12 @@
 import React, { useEffect, useGlobal } from "reactn";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import firebase from "firebase/app";
 import "firebase/auth";
+import Type from "../components/Type";
+import Loader from "../components/Loader";
 import randomName from "../utils/getRandomName";
+import { getRandomIcon } from "../utils/user-icon-list";
+
 export default function Auth() {
   const [, setUser] = useGlobal("user");
 
@@ -37,7 +41,7 @@ export default function Auth() {
         setUser({
           id: uid,
           name,
-          avatar: `https://avatars.dicebear.com/api/gridy/${name}.svg`,
+          avatar: getRandomIcon(),
         });
       } else {
         // User is signed out.
@@ -47,8 +51,9 @@ export default function Auth() {
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
-      <Text>Loading!</Text>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Loader />
+      <Type>Getting Location...</Type>
     </View>
   );
 }

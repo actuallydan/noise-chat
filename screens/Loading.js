@@ -1,12 +1,11 @@
 import React from "react";
 import { Image, View, StyleSheet } from "react-native";
+import Loader from "../components/Loader";
 
 export default function Loading() {
-  const src = require("../assets/favicon.png");
-
   return (
     <View style={styles.wrapper}>
-      <Image source={src} />
+      <Loader />
     </View>
   );
 }

@@ -1,18 +1,35 @@
 import React, { useState, useEffect, useGlobal, setGlobal } from "reactn";
 
-import { StatusBar, StyleSheet, View, Text, Dimensions } from "react-native";
-import * as SplashScreen from "expo-splash-screen";
+import {
+  StatusBar,
+  StyleSheet,
+  View,
+  Text,
+  Dimensions,
+  ScrollView,
+  Platform,
+  LogBox,
+} from "react-native";
+import AppLoading from "expo-app-loading";
 import * as Location from "expo-location";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
-
+import Loader from "./components/Loader";
+import { useFonts } from "expo-font";
 import firebase from "firebase/app";
 import "firebase/auth";
+import { theme, ThemeContext } from "./utils/theme";
 
-// import * as Font from "expo-font";
+import Header from "./components/Header";
+import Type from "./components/Type";
+import BigInput from "./components/BigInput";
+import Card from "./components/Card";
+import IconButton from "./components/IconButton";
+import Button from "./components/Button";
+import Input from "./components/Input";
+import SmallType from "./components/SmallType";
+import Screen from "./components/Screen";
+// import { setCustomText, setCustomTextInput } from "react-native-global-props";
 
-import { setCustomText, setCustomTextInput } from "react-native-global-props";
-
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import Chat from "./screens/Chat";
 // import Loading from "./screens/Loading";
@@ -24,6 +41,9 @@ setGlobal({
   user: null,
 });
 
+if (process.env.NODE_ENV !== "production") {
+  Platform.OS !== "web" && LogBox.ignoreLogs(["Setting a timer"]);
+}
 // init firebase
 const firebaseConfig = {
   apiKey: process.env.API_KEY,
@@ -39,7 +59,7 @@ firebase.initializeApp(firebaseConfig);
 firebase.auth().useDeviceLanguage();
 
 export default function App(props) {
-  const [isLoadingComplete, setLoadingComplete] = useState(false);
+  const [value, setValue] = useState("");
   const [errorMsg, setErrorMsg] = useState(null);
 
   const [location, setLocation] = useGlobal("location");
@@ -49,6 +69,19 @@ export default function App(props) {
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
   });
+
+  const [fontsLoaded] = useFonts({
+    "Atkinson-Hyperlegible": require("./assets/fonts/Atkinson-Hyperlegible.otf"),
+    Lora: require("./assets/fonts/Lora.ttf"),
+  });
+
+  const updateTheme = (color) => {
+    theme.accent = color;
+    // also save the value in async storage for the future
+    AsyncStorage.setItem("accent-color");
+  };
+
+  theme.updateAccent = updateTheme;
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
@@ -66,45 +99,6 @@ export default function App(props) {
       setLocation({ latitude, longitude });
     })();
 
-    async function loadResourcesAndDataAsync() {
-      try {
-        // SplashScreen.preventAutoHideAsync();
-
-        // Load our initial navigation state
-        // setInitialNavigationState(await getInitialState());
-
-        // Load fonts
-        // await Font.loadAsync({
-        //   SpaceGrotesk: require("./assets/fonts/SpaceGrotesk_SemiBold.otf"),
-        // });
-
-        // // if we have a preferred theme in storage, set it before we load the app
-        // if (res !== null) {
-        //   setActiveTheme(themes[res]);
-        // }
-
-        // Make sure to use this font EVERYWHERE so we don't have to manually assign it
-        const customTextProps = {
-          style: {
-            // fontFamily: "SpaceGrotesk",
-          },
-        };
-        // I don't think this does anything...at least in web
-        Text.defaultProps = Text.defaultProps || {};
-        // Text.defaultProps.style = { fontFamily: "SpaceGrotesk" };
-
-        setCustomText(customTextProps);
-        setCustomTextInput(customTextProps);
-      } catch (e) {
-        // We might want to provide this error information to an error reporting service
-        console.warn(e);
-      } finally {
-        // SplashScreen.hideAsync();
-        setLoadingComplete(true);
-      }
-    }
-
-    loadResourcesAndDataAsync();
     Dimensions.addEventListener("change", resize);
 
     return () => {
@@ -132,21 +126,20 @@ export default function App(props) {
     console.error(errorMsg);
   }
 
-  // don't return anything if not ready, this way we display the loading screen longer
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
+  const containerStyle = [styles.container, { backgroundColor: theme.dark }];
+  if (!fontsLoaded) {
     return null;
+  } else {
+    return (
+      <ThemeContext.Provider value={theme}>
+        <SafeAreaProvider>
+          <View style={containerStyle} onLayout={onRotate}>
+            {user && location ? <Chat /> : <Auth />}
+          </View>
+        </SafeAreaProvider>
+      </ThemeContext.Provider>
+    );
   }
-
-  return (
-    <View style={styles.container} onLayout={onRotate}>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaProvider>
-        <SafeAreaView style={styles.container}>
-          {user && location ? <Chat /> : <Auth />}
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({
@@ -154,8 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
-    // backgroundColor: "#282a38",
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "stretch",
   },
