@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import dayjs from "dayjs";
+import Type from "./Type";
 
 export default function Day({
   text = "",
@@ -12,9 +13,9 @@ export default function Day({
   return (
     <View style={[styles.container, containerStyle]}>
       <View style={wrapperStyle}>
-        <Text style={[styles.text, textStyle]} {...textProps}>
+        <Type style={textStyle} {...textProps}>
           {dayjs(text).format("ll")}
-        </Text>
+        </Type>
       </View>
     </View>
   );
@@ -26,11 +27,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 5,
     marginBottom: 10,
-  },
-  text: {
-    backgroundColor: "transparent",
-    color: "#333",
-    fontSize: 12,
-    fontWeight: "600",
   },
 });

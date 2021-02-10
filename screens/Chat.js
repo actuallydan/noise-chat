@@ -1,21 +1,33 @@
-import React, { useState, useEffect, useGlobal } from "reactn";
-import { Platform } from "react-native";
-import { GiftedChat } from "react-native-gifted-chat";
+import React, {
+  useState,
+  useEffect,
+  useGlobal,
+  useRef,
+  useContext,
+} from "reactn";
+import { Platform, View } from "react-native";
+import { GiftedChat, Composer, InputToolbar } from "react-native-gifted-chat";
 import emojiUtils from "emoji-utils";
+import { ThemeContext } from "../utils/theme";
 
 import firebase from "firebase/app";
 import "@firebase/firestore";
 import flatten from "lodash.flatten";
 import dayjs from "dayjs";
-import SlackMessage from "../components/SlackMessage";
 import Message from "../components/Message";
+import Screen from "../components/Screen";
+import IconButton from "../components/IconButton";
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [location] = useGlobal("location");
   const [user] = useGlobal("user");
   const [messagesObj, setMessagesObj] = useState({});
+  const [text, setText] = useState("");
+  const theme = useContext(ThemeContext);
+  const [height, setHeight] = useState(25);
 
+  const giftedChatRef = useRef(null);
   const latLongID =
     location.latitude.toFixed(2) + "+" + location.longitude.toFixed(2);
 
@@ -75,11 +87,16 @@ export default function Chat() {
             });
           }
 
-          // Since the docs resolve to data asynchronously, use the resolver pattern to not overwrite other updates
+          // Since the documents (messages) resolve to data asynchronously, use the resolver pattern to not overwrite other updates
           setMessagesObj((oldMessagesObj) => ({
             ...oldMessagesObj,
             [loc]: msgs,
           }));
+
+          // on new message scroll to footer Ref
+          if (giftedChatRef.current) {
+            giftedChatRef.current.scrollToBottom();
+          }
         });
     });
 
@@ -87,18 +104,11 @@ export default function Chat() {
     return () => unsubs.forEach((u) => u());
   }, []);
 
-  function uuidv4() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (
-      c
-    ) {
-      var r = (Math.random() * 16) | 0,
-        v = c == "x" ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
-
   async function onSend(messages = []) {
-    messages = messages.map(async (m) => {
+    messages.forEach(async (m) => {
+      if (m.text.trim() === "") {
+        return;
+      }
       // const newID = uuidv4();
       const newObj = {
         ...m,
@@ -107,11 +117,8 @@ export default function Chat() {
         createdAt: new Date().toJSON(),
       };
 
-      console.log({ newObj });
       // instead of using .doc(newID).set(data) we could have used .add(data), but then we wouldn't ahve control of it's ID
       await ref.doc(m._id).set(newObj);
-
-      return newObj;
     });
 
     // save in firestore
@@ -122,10 +129,72 @@ export default function Chat() {
     // long: -77.02
     // text: "test"
     // user: "s8d7f65v8s7d65f"
-
-    // setMessages((oldMessages) => GiftedChat.append(oldMessages, messages));
   }
 
+  function renderComposer(props) {
+    const onInputSizeChanged = ({ height }) => {
+      height = Math.round(height / 25) * 25;
+      // enforce max composer height
+      if (height < 150) {
+        setHeight(height);
+      }
+    };
+    return (
+      <Composer
+        {...props}
+        placeholderTextColor={theme.accent + "99"}
+        placeholder="Type Message..."
+        onInputSizeChanged={onInputSizeChanged}
+        composerHeight={props.text.trim() === "" ? 25 : height}
+        underlineColorAndroid={"transparent"}
+        textInputStyle={{
+          fontFamily: "Atkinson-Hyperlegible",
+          borderWidth: 0,
+          textAlignVertical: "center",
+          fontSize: 16,
+          lineHeight: 25,
+          color: theme.accent,
+        }}
+      />
+    );
+  }
+  function renderInputToolbar({ children, ...props }) {
+    const containerStyle = {
+      borderColor: theme.accent,
+      backgroundColor: theme.dark,
+      marginVertical: 5,
+      borderWidth: 3,
+      borderRadius: 10,
+      padding: 8,
+      borderTopColor: theme.accent,
+      borderTopWidth: 3,
+      flexDirection: "row",
+      alignItems: "center",
+      // something needs to be done here to make it run on web...
+    };
+    return (
+      <InputToolbar
+        nativeID="uguhguh"
+        {...props}
+        containerStyle={containerStyle}
+      />
+    );
+  }
+
+  function renderSend(props) {
+    const onSend = () => {
+      props.onSend({ text: props.text.trim() }, true);
+    };
+    return (
+      <IconButton
+        onPress={onSend}
+        name="chevron-forward-sharp"
+        size={25}
+        lightMode={props.text}
+        disabled={!props.text}
+      />
+    );
+  }
   function renderMessage(props) {
     const {
       currentMessage: { text: currText },
@@ -143,26 +212,27 @@ export default function Chat() {
     }
 
     return (
-      // <SlackMessage
-      //   key={props.id}
-      //   {...props}
-      //   messageTextStyle={messageTextStyle}
-      // />
       <Message key={props.id} {...props} messageTextStyle={messageTextStyle} />
     );
   }
 
-  // console.log(messagesObj);
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={onSend}
-      user={{
-        _id: user.id,
-        name: user.name || "",
-        avatar: user.avatar,
-      }}
-      renderMessage={renderMessage}
-    />
+    <Screen>
+      <GiftedChat
+        messages={messages}
+        onSend={onSend}
+        user={{
+          _id: user.id,
+          name: user.name || "",
+          avatar: user.avatar,
+        }}
+        renderFooter={() => <View style={{ height: 30 }}></View>}
+        ref={(ref) => (giftedChatRef.current = ref)}
+        renderMessage={renderMessage}
+        renderInputToolbar={renderInputToolbar}
+        renderComposer={renderComposer}
+        renderSend={renderSend}
+      />
+    </Screen>
   );
 }

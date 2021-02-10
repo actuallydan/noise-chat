@@ -3,6 +3,10 @@ import { StyleSheet, View, Text, Platform, Image } from "react-native";
 import Day from "./Day";
 import dayjs from "dayjs";
 import { SvgUri } from "react-native-svg";
+import Type from "./Type";
+import Card from "./Card";
+import SmallType from "./SmallType";
+import IconButton from "./IconButton";
 
 const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
   const timestamp = dayjs(currentMessage.createdAt).format("LT");
@@ -17,6 +21,12 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
     showAvatar = false;
   }
 
+  // Does this message belong to the current user?
+  let isMine = false;
+  if (currentMessage.user._id === props.user._id) {
+    isMine = true;
+  }
+
   // Determine if we need to display the current day
   let showDay = true;
   if (
@@ -27,44 +37,48 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
     showDay = false;
   }
 
+  const messageAvatarAndContentWrapperStyle = [
+    styles.messageAvatarAndContentWrapper,
+    showAvatar ? { marginTop: 5 } : {},
+    isMine ? { flexDirection: "row-reverse" } : {},
+  ];
+
+  const userAndTimeWrapperStyle = [
+    styles.userAndTimeWrapper,
+    isMine ? { flexDirection: "row-reverse" } : {},
+  ];
+
+  const messageUserTextStyle = isMine
+    ? { marginLeft: 10 }
+    : { marginRight: 10 };
   return (
     <View style={styles.messageWrapper}>
       {showDay && (
         <Day text={new Date(currentMessage.createdAt).toLocaleDateString()} />
       )}
-      <View
-        style={[
-          styles.messageAvatarAndContentWrapper,
-          showAvatar ? { marginTop: 5 } : {},
-        ]}
-      >
+      <View style={messageAvatarAndContentWrapperStyle}>
         {showAvatar ? (
           <View style={styles.avatarWrapper}>
-            {Platform.OS === "web" ? (
-              <Image
-                source={{ uri: currentMessage.user.avatar }}
-                style={styles.messageAvatar}
-              />
-            ) : (
-              <SvgUri
-                uri={currentMessage.user.avatar}
-                style={styles.messageAvatar}
-              />
-            )}
+            <IconButton name={currentMessage.user.avatar} />
           </View>
         ) : (
           <View style={styles.avatarWrapperEmpty} />
         )}
-        <View>
+        <View style={styles.flexShrink}>
           {showAvatar && (
-            <View style={styles.userAndTimeWrapper}>
-              <Text style={styles.messageUserText}>
+            <View style={userAndTimeWrapperStyle}>
+              <Type style={messageUserTextStyle}>
                 {currentMessage.user.name}
-              </Text>
-              <Text style={styles.timestamp}>{timestamp}</Text>
+              </Type>
+              <SmallType>{timestamp}</SmallType>
             </View>
           )}
-          <Text style={styles.messageText}>{currentMessage.text}</Text>
+          <Card
+            lightMode={isMine}
+            // style={{ flex: 1, flexDirection: "row", flexShrink: 1 }}
+          >
+            <Type lightMode={isMine}>{currentMessage.text}</Type>
+          </Card>
         </View>
       </View>
     </View>
@@ -91,14 +105,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 5,
   },
-  messageWrapper: {
-    marginHorizontal: 15,
-  },
-  messageUserText: {
-    color: "#000000",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  messageWrapper: {},
   avatarWrapper: {
     height: 40,
     width: 40,
@@ -116,16 +123,14 @@ const styles = StyleSheet.create({
     width: 30,
   },
   messageText: {
-    color: "#000000",
     paddingVertical: 0,
     paddingRight: 15,
-
     fontSize: 15,
   },
   timestamp: {
-    color: "#000000b7",
     fontWeight: "300",
     fontSize: 14,
     marginLeft: 10,
   },
+  flexShrink: { flexShrink: 1 },
 });
