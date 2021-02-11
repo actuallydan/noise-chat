@@ -1,29 +1,38 @@
-import React, { useContext } from "react";
-import { Text, StyleSheet } from "react-native";
+import React, { useContext } from "reactn";
+import { View, StyleSheet } from "react-native";
 import { ThemeContext } from "../utils/theme";
 
-export default function Header({
-  children,
-  size = 30,
-  lightMode = false,
-  ...props
-}) {
+export default function Heading() {
   const theme = useContext(ThemeContext);
 
-  const style = {
-    fontSize: size,
-    color: lightMode ? theme.dark : theme.accent,
-  };
+  const iconWrapperStyles = [
+    styles.iconWrapper,
+    { backgroundColor: theme.dark },
+  ];
+
   return (
-    <Text style={[styles.text, style]} {...props}>
-      {children}
-    </Text>
+    <View style={styles.headerView}>
+      <View style={[iconWrapperStyles]}>
+        <IconButton name="filter-sharp" lightMode round size={35} />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontFamily: "Lora",
-    marginVertical: 5,
+  headerView: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "absolute",
+    top: 5,
+    left: 10,
+    zIndex: 2,
+  },
+  iconWrapperStyles: {
+    borderRadius: 9999,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
