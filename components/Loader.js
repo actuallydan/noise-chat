@@ -1,15 +1,12 @@
-import React, { Component } from "react";
+import React, { Component } from "reactn";
 import { Animated, View, StyleSheet } from "react-native";
 import { HeadingClassComponent } from "./Heading";
-import { ThemeContext } from "../utils/theme";
 
 const heights = [2, 3, 2, 1, 2];
 
 const AnimatedHeading = Animated.createAnimatedComponent(HeadingClassComponent);
 
 export default class Loader extends Component {
-  static contextType = ThemeContext;
-
   state = {
     animations: heights.map(
       (h) => new Animated.Value(h * (this.props.size / 20))
@@ -57,7 +54,7 @@ export default class Loader extends Component {
 
   render() {
     const { size } = this.props;
-    const theme = this.context;
+    const { theme } = this.global;
 
     const boxStyle = {
       width: size / 10,

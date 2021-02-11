@@ -1,6 +1,5 @@
-import React, { useContext } from "react";
+import React, { useGlobal } from "reactn";
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
-import { ThemeContext } from "../utils/theme";
 
 export default function Button({
   lightMode,

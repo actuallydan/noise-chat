@@ -1,9 +1,8 @@
-import React, { useContext } from "reactn";
+import React, { useGlobal } from "reactn";
 import { View, StyleSheet } from "react-native";
-import { ThemeContext } from "../utils/theme";
 import IconButton from "./IconButton";
 
-export default function Heading({ onPress, ...props }) {
+export default function Header({ onPress, ...props }) {
   const [theme] = useGlobal("theme");
   const iconWrapperStyles = [
     styles.iconWrapper,

@@ -3,13 +3,11 @@ import React, {
   useEffect,
   useGlobal,
   useRef,
-  useContext,
   useCallback,
 } from "reactn";
 import { Platform, View, StyleSheet } from "react-native";
 import { GiftedChat, Composer, InputToolbar } from "react-native-gifted-chat";
 import emojiUtils from "emoji-utils";
-import { ThemeContext } from "../utils/theme";
 
 import firebase from "../utils/firebase";
 import flatten from "lodash.flatten";
@@ -28,8 +26,8 @@ export default function Chat({ navigation }) {
   const [location] = useGlobal("location");
   const [user] = useGlobal("user");
   const [messagesObj, setMessagesObj] = useState({});
-  const [text, setText] = useState("");
-const [theme] = useGlobal('theme')  const [height, setHeight] = useState(LINE_HEIGHT);
+  const [theme] = useGlobal("theme");
+  const [height, setHeight] = useState(LINE_HEIGHT);
 
   const giftedChatRef = useRef(null);
   const latLongID = location

@@ -1,7 +1,6 @@
-import React, { useContext } from "react";
+import React, { useGlobal } from "reactn";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ThemeContext } from "../utils/theme";
 
 export default function IconButton({
   lightMode,
