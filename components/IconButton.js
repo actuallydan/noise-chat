@@ -10,13 +10,14 @@ export default function IconButton({
   onPress = () => {},
   border = true,
   round = false,
+  containerStyle = {},
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const touchStyle = {
     width: size + 2,
     height: size + 2,
+    ...containerStyle,
   };
   const viewStyle = {
     backgroundColor: lightMode ? theme.accent : theme.dark,

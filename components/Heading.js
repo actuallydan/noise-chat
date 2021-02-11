@@ -9,8 +9,7 @@ export default function Heading({
   style = {},
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const textStyle = [
     defaultStyles.text,
     {

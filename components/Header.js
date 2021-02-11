@@ -1,10 +1,10 @@
 import React, { useContext } from "reactn";
 import { View, StyleSheet } from "react-native";
 import { ThemeContext } from "../utils/theme";
+import IconButton from "./IconButton";
 
-export default function Heading() {
-  const theme = useContext(ThemeContext);
-
+export default function Heading({ onPress, ...props }) {
+  const [theme] = useGlobal("theme");
   const iconWrapperStyles = [
     styles.iconWrapper,
     { backgroundColor: theme.dark },
@@ -13,7 +13,13 @@ export default function Heading() {
   return (
     <View style={styles.headerView}>
       <View style={[iconWrapperStyles]}>
-        <IconButton name="filter-sharp" lightMode round size={35} />
+        <IconButton
+          name="filter-sharp"
+          lightMode
+          round
+          size={35}
+          onPress={onPress}
+        />
       </View>
     </View>
   );

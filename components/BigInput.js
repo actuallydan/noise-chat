@@ -4,8 +4,7 @@ import IconButton from "./IconButton";
 import { ThemeContext } from "../utils/theme";
 
 export default function BigInput({ lightMode, onPress = () => {}, ...props }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const [isFocused, setIsFocused] = useState(false);
 
   const onFocus = () => {

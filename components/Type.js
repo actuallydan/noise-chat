@@ -8,8 +8,7 @@ export default function Type({
   lightMode = false,
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const colorStyles = {
     color: lightMode ? theme.dark : theme.accent,
   };

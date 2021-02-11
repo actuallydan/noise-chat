@@ -5,8 +5,7 @@ import { ThemeContext } from "../utils/theme";
 
 export default function Screen({ style = {}, ...props }) {
   const insets = useSafeAreaInsets();
-  const theme = useContext(ThemeContext);
-  const insetStyles = {
+const [theme] = useGlobal('theme')  const insetStyles = {
     paddingBottom: Math.max(insets.bottom, 16),
     paddingTop: insets.top,
   };

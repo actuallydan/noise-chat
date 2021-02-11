@@ -8,10 +8,14 @@ import { useFonts } from "expo-font";
 import { theme, ThemeContext } from "./utils/theme";
 
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { NavigationContainer } from "@react-navigation/native";
+
+import { createStackNavigator } from "@react-navigation/stack";
+const Stack = createStackNavigator();
 
 import Chat from "./screens/Chat";
 import Auth from "./screens/Auth";
-import LoaderTest from "./screens/LoaderTest";
+import Settings from "./screens/Settings";
 
 // init reactn store
 setGlobal({
@@ -42,10 +46,10 @@ export default function App() {
   const updateTheme = (color) => {
     theme.accent = color;
     // also save the value in async storage for the future
-    AsyncStorage.setItem("accent-color");
+    // AsyncStorage.setItem("accent-color");
   };
 
-  theme.updateAccent = updateTheme;
+  theme.updateTheme = updateTheme;
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
@@ -117,9 +121,25 @@ export default function App() {
     return (
       <ThemeContext.Provider value={theme}>
         <SafeAreaProvider>
-          <View style={containerStyle} onLayout={onRotate}>
-            {user && location ? <Chat /> : <Auth />}
-          </View>
+          <NavigationContainer>
+            <View style={containerStyle} onLayout={onRotate}>
+              {/* {user && location ? <Chat /> : <Auth />} */}
+              <Stack.Navigator
+                initialRouteName="auth"
+                screenOptions={{
+                  cardStyle: { backgroundColor: "transparent" },
+                  cardOverlayEnabled: false,
+                  headerShown: false,
+                }}
+                headerMode={"none"}
+              >
+                <Stack.Screen name="auth" component={Auth} />
+
+                <Stack.Screen name="chat" component={Chat} />
+                <Stack.Screen name="settings" component={Settings} />
+              </Stack.Navigator>
+            </View>
+          </NavigationContainer>
         </SafeAreaProvider>
       </ThemeContext.Provider>
     );

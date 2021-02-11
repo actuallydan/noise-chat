@@ -8,8 +8,7 @@ export default function Card({
   style = {},
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const bgStyle = {
     borderColor: theme.accent,
     backgroundColor: lightMode ? theme.accent : theme.dark,

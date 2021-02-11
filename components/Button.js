@@ -8,8 +8,7 @@ export default function Button({
   children,
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const viewStyle = {
     borderColor: theme.accent,
     backgroundColor: lightMode ? theme.accent : theme.dark,
