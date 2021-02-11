@@ -10,13 +10,14 @@ import { GiftedChat, Composer, InputToolbar } from "react-native-gifted-chat";
 import emojiUtils from "emoji-utils";
 import { ThemeContext } from "../utils/theme";
 
-import firebase from "firebase/app";
-import "@firebase/firestore";
+import firebase from "../utils/firebase";
 import flatten from "lodash.flatten";
 import dayjs from "dayjs";
 import Message from "../components/Message";
 import Screen from "../components/Screen";
 import IconButton from "../components/IconButton";
+
+const LINE_HEIGHT = 25;
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
@@ -25,7 +26,7 @@ export default function Chat() {
   const [messagesObj, setMessagesObj] = useState({});
   const [text, setText] = useState("");
   const theme = useContext(ThemeContext);
-  const [height, setHeight] = useState(25);
+  const [height, setHeight] = useState(LINE_HEIGHT);
 
   const giftedChatRef = useRef(null);
   const latLongID =
@@ -133,7 +134,7 @@ export default function Chat() {
 
   function renderComposer(props) {
     const onInputSizeChanged = ({ height }) => {
-      height = Math.round(height / 25) * 25;
+      height = Math.round(height / LINE_HEIGHT) * LINE_HEIGHT;
       // enforce max composer height
       if (height < 150) {
         setHeight(height);
@@ -145,14 +146,14 @@ export default function Chat() {
         placeholderTextColor={theme.accent + "99"}
         placeholder="Type Message..."
         onInputSizeChanged={onInputSizeChanged}
-        composerHeight={props.text.trim() === "" ? 25 : height}
+        composerHeight={props.text.trim() === "" ? LINE_HEIGHT : height}
         underlineColorAndroid={"transparent"}
         textInputStyle={{
           fontFamily: "Atkinson-Hyperlegible",
           borderWidth: 0,
           textAlignVertical: "center",
           fontSize: 16,
-          lineHeight: 25,
+          lineHeight: LINE_HEIGHT,
           color: theme.accent,
         }}
       />
@@ -189,7 +190,7 @@ export default function Chat() {
       <IconButton
         onPress={onSend}
         name="chevron-forward-sharp"
-        size={25}
+        size={LINE_HEIGHT}
         lightMode={props.text}
         disabled={!props.text}
       />
@@ -218,6 +219,32 @@ export default function Chat() {
 
   return (
     <Screen>
+      <View
+        style={{
+          // height: 20,
+          flexDirection: "row",
+          alignItems: "center",
+          // backgroundColor: "#00000090",
+          position: "absolute",
+          top: 5,
+          left: 10,
+          zIndex: 2,
+          // width: "100%",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: theme.dark,
+            borderRadius: 9999,
+            width: 40,
+            height: 40,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton name="filter-sharp" lightMode round size={35} />
+        </View>
+      </View>
       <GiftedChat
         messages={messages}
         onSend={onSend}
@@ -232,6 +259,7 @@ export default function Chat() {
         renderInputToolbar={renderInputToolbar}
         renderComposer={renderComposer}
         renderSend={renderSend}
+        messagesContainerStyle={{ paddingTop: 25 }}
       />
     </Screen>
   );

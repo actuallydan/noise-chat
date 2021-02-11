@@ -1,11 +1,11 @@
 import React, { useEffect, useGlobal } from "reactn";
-import { View } from "react-native";
-import firebase from "firebase/app";
-import "firebase/auth";
+import { View, StyleSheet } from "react-native";
+import firebase from "../utils/firebase";
 import Type from "../components/Type";
 import Loader from "../components/Loader";
 import randomName from "../utils/getRandomName";
 import { getRandomIcon } from "../utils/user-icon-list";
+import Heading from "../components/Heading";
 
 export default function Auth() {
   const [, setUser] = useGlobal("user");
@@ -51,9 +51,22 @@ export default function Auth() {
   }, []);
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Loader />
-      <Type>Getting Location...</Type>
+    <View
+      style={{ flex: 1, justifyContent: "space-around", alignItems: "center" }}
+    >
+      <Heading size={50}>[noise]</Heading>
+
+      <View style={styles.centerCenter}>
+        <Loader />
+        <Type>Getting Location...</Type>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  centerCenter: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

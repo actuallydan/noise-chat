@@ -1,14 +1,16 @@
 {
   "expo": {
-    "name": "spire",
-    "slug": "spire",
+    "name": "noise",
+    "slug": "noise",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/noise-logo-bg.png",
+    "backgroundColor": "#2B283E",
+    "primaryColor": "#2B283E",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/noise-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2B283E"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -18,7 +20,7 @@
       "supportsTablet": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/noise-logo-bg.png"
     }
   }
 }

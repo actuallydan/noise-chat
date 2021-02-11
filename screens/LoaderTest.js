@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import { Animated, View, StyleSheet } from "react-native";
-import { HeadingClassComponent } from "./Heading";
+import { HeadingClassComponent } from "../components/Heading";
 import { ThemeContext } from "../utils/theme";
 
-const heights = [2, 3, 2, 1, 2];
+let heights = [2, 3, 2, 1, 2];
 
 const AnimatedHeading = Animated.createAnimatedComponent(HeadingClassComponent);
 
-export default class Loader extends Component {
+class AnimatedLoader extends Component {
   static contextType = ThemeContext;
 
   state = {
@@ -103,13 +103,15 @@ export default class Loader extends Component {
     );
   }
 }
-
-Loader.defaultProps = {
+AnimatedLoader.defaultProps = {
   size: 20,
 };
 
+export default AnimatedLoader;
+
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },

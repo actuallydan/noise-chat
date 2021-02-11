@@ -1,39 +1,17 @@
 import React, { useState, useEffect, useGlobal, setGlobal } from "reactn";
 
-import {
-  StatusBar,
-  StyleSheet,
-  View,
-  Text,
-  Dimensions,
-  ScrollView,
-  Platform,
-  LogBox,
-} from "react-native";
-import AppLoading from "expo-app-loading";
+import { StyleSheet, View, Dimensions, Platform, LogBox } from "react-native";
+// import AppLoading from "expo-app-loading";
 import * as Location from "expo-location";
-import Loader from "./components/Loader";
 import { useFonts } from "expo-font";
-import firebase from "firebase/app";
-import "firebase/auth";
-import { theme, ThemeContext } from "./utils/theme";
 
-import Header from "./components/Header";
-import Type from "./components/Type";
-import BigInput from "./components/BigInput";
-import Card from "./components/Card";
-import IconButton from "./components/IconButton";
-import Button from "./components/Button";
-import Input from "./components/Input";
-import SmallType from "./components/SmallType";
-import Screen from "./components/Screen";
-// import { setCustomText, setCustomTextInput } from "react-native-global-props";
+import { theme, ThemeContext } from "./utils/theme";
 
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import Chat from "./screens/Chat";
-// import Loading from "./screens/Loading";
 import Auth from "./screens/Auth";
+import LoaderTest from "./screens/LoaderTest";
 
 // init reactn store
 setGlobal({
@@ -44,22 +22,8 @@ setGlobal({
 if (process.env.NODE_ENV !== "production") {
   Platform.OS !== "web" && LogBox.ignoreLogs(["Setting a timer"]);
 }
-// init firebase
-const firebaseConfig = {
-  apiKey: process.env.API_KEY,
-  authDomain: process.env.AUTH_DOMAIN,
-  databaseURL: process.env.DB_URL,
-  projectId: process.env.PROJECT_ID,
-  storageBucket: process.env.STORAGE_BUCKET,
-  messagingSenderId: process.env.MESSAGING_SENDER_ID,
-  appId: process.env.APP_ID,
-};
 
-firebase.initializeApp(firebaseConfig);
-firebase.auth().useDeviceLanguage();
-
-export default function App(props) {
-  const [value, setValue] = useState("");
+export default function App() {
   const [errorMsg, setErrorMsg] = useState(null);
 
   const [location, setLocation] = useGlobal("location");
@@ -72,7 +36,7 @@ export default function App(props) {
 
   const [fontsLoaded] = useFonts({
     "Atkinson-Hyperlegible": require("./assets/fonts/Atkinson-Hyperlegible.otf"),
-    Lora: require("./assets/fonts/Lora.ttf"),
+    "Teko-Medium": require("./assets/fonts/Teko-Medium.ttf"),
   });
 
   const updateTheme = (color) => {
@@ -85,24 +49,44 @@ export default function App(props) {
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
+    let listener = { remove: () => {} };
     (async () => {
       let { status } = await Location.requestPermissionsAsync();
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied");
       }
 
-      let location = await Location.getCurrentPositionAsync({});
-      const {
-        coords: { latitude, longitude },
-      } = location;
+      // let location = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Low});
+      listener = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Low,
+          // re-poll
+          timeInterval: 60000,
+        },
+        (newLocation) => {
+          const {
+            coords: { latitude, longitude },
+          } = newLocation;
 
-      setLocation({ latitude, longitude });
+          console.log(
+            location,
+            latitude,
+            longitude,
+            location?.latitude === latitude,
+            location?.longitude === longitude
+          );
+
+          // TODO: only update if they aren't the within the same 0.01 degrees
+          setLocation({ latitude, longitude });
+        }
+      );
     })();
 
     Dimensions.addEventListener("change", resize);
 
     return () => {
       Dimensions.removeEventListener("change", resize);
+      listener.remove();
     };
   }, []);
 

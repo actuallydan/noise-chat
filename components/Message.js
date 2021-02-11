@@ -1,8 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import { StyleSheet, View, Text, Platform, Image } from "react-native";
 import Day from "./Day";
 import dayjs from "dayjs";
-import { SvgUri } from "react-native-svg";
 import Type from "./Type";
 import Card from "./Card";
 import SmallType from "./SmallType";
@@ -59,7 +58,7 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
       <View style={messageAvatarAndContentWrapperStyle}>
         {showAvatar ? (
           <View style={styles.avatarWrapper}>
-            <IconButton name={currentMessage.user.avatar} />
+            <IconButton name={currentMessage.user.avatar} lightMode={isMine} />
           </View>
         ) : (
           <View style={styles.avatarWrapperEmpty} />
@@ -73,10 +72,7 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
               <SmallType>{timestamp}</SmallType>
             </View>
           )}
-          <Card
-            lightMode={isMine}
-            // style={{ flex: 1, flexDirection: "row", flexShrink: 1 }}
-          >
+          <Card lightMode={isMine}>
             <Type lightMode={isMine}>{currentMessage.text}</Type>
           </Card>
         </View>
@@ -85,7 +81,7 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
   );
 };
 
-export default Message;
+export default memo(Message);
 
 const styles = StyleSheet.create({
   messageAvatarAndContentWrapper: {
@@ -101,9 +97,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userAndTimeWrapper: {
+    height: 25,
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 5,
+    margin: 5,
   },
   messageWrapper: {},
   avatarWrapper: {
