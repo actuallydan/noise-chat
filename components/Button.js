@@ -1,6 +1,5 @@
-import React, { useContext } from "react";
+import React, { useGlobal } from "reactn";
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
-import { ThemeContext } from "../utils/theme";
 
 export default function Button({
   lightMode,
@@ -8,8 +7,7 @@ export default function Button({
   children,
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const viewStyle = {
     borderColor: theme.accent,
     backgroundColor: lightMode ? theme.accent : theme.dark,

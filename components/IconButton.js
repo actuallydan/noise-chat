@@ -1,7 +1,6 @@
-import React, { useContext } from "react";
+import React, { useGlobal } from "reactn";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ThemeContext } from "../utils/theme";
 
 export default function IconButton({
   lightMode,
@@ -10,13 +9,14 @@ export default function IconButton({
   onPress = () => {},
   border = true,
   round = false,
+  containerStyle = {},
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const touchStyle = {
     width: size + 2,
     height: size + 2,
+    ...containerStyle,
   };
   const viewStyle = {
     backgroundColor: lightMode ? theme.accent : theme.dark,

@@ -1,6 +1,5 @@
-import React, { Component, useContext } from "react";
+import React, { useGlobal } from "reactn";
 import { Text, StyleSheet } from "react-native";
-import { ThemeContext } from "../utils/theme";
 
 export default function Heading({
   children,
@@ -9,7 +8,7 @@ export default function Heading({
   style = {},
   ...props
 }) {
-  const theme = useContext(ThemeContext);
+  const [theme] = useGlobal("theme");
 
   const textStyle = [
     defaultStyles.text,
@@ -27,9 +26,7 @@ export default function Heading({
   );
 }
 
-export class HeadingClassComponent extends Component {
-  static contextType = ThemeContext;
-
+export class HeadingClassComponent extends React.Component {
   render() {
     const {
       children,
@@ -39,7 +36,8 @@ export class HeadingClassComponent extends Component {
       ...props
     } = this.props;
 
-    const theme = this.context;
+    const { theme } = this.global;
+
     const textStyle = [
       defaultStyles.text,
       {

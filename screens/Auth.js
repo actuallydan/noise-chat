@@ -6,8 +6,10 @@ import Loader from "../components/Loader";
 import randomName from "../utils/getRandomName";
 import { getRandomIcon } from "../utils/user-icon-list";
 import Heading from "../components/Heading";
+import Screen from "../components/Screen";
+import { StackActions } from "@react-navigation/native";
 
-export default function Auth() {
+export default function Auth({ navigation }) {
   const [, setUser] = useGlobal("user");
 
   function authorize() {
@@ -38,11 +40,16 @@ export default function Auth() {
         const uid = user.uid;
         const name = randomName();
 
-        setUser({
-          id: uid,
-          name,
-          avatar: getRandomIcon(),
-        });
+        setUser(
+          {
+            id: uid,
+            name,
+            avatar: getRandomIcon(),
+          },
+          () => {
+            navigation.dispatch(StackActions.replace("chat"));
+          }
+        );
       } else {
         // User is signed out.
         setUser(null);
@@ -51,16 +58,16 @@ export default function Auth() {
   }, []);
 
   return (
-    <View
+    <Screen
       style={{ flex: 1, justifyContent: "space-around", alignItems: "center" }}
     >
       <Heading size={50}>[noise]</Heading>
 
       <View style={styles.centerCenter}>
         <Loader />
-        <Type>Getting Location...</Type>
+        <Type>Connecting...</Type>
       </View>
-    </View>
+    </Screen>
   );
 }
 

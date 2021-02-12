@@ -1,6 +1,5 @@
-import React, { useContext } from "react";
+import React, { useGlobal } from "reactn";
 import { View, StyleSheet } from "react-native";
-import { ThemeContext } from "../utils/theme";
 
 export default function Card({
   lightMode = false,
@@ -8,8 +7,7 @@ export default function Card({
   style = {},
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const bgStyle = {
     borderColor: theme.accent,
     backgroundColor: lightMode ? theme.accent : theme.dark,

@@ -1,6 +1,5 @@
-import React, { useContext } from "react";
+import React, { useGlobal } from "reactn";
 import { Text, StyleSheet } from "react-native";
-import { ThemeContext } from "../utils/theme";
 
 export default function Type({
   children,
@@ -8,8 +7,7 @@ export default function Type({
   lightMode = false,
   ...props
 }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const colorStyles = {
     color: lightMode ? theme.dark : theme.accent,
   };

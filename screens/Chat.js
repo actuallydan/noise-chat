@@ -3,12 +3,11 @@ import React, {
   useEffect,
   useGlobal,
   useRef,
-  useContext,
+  useCallback,
 } from "reactn";
-import { Platform, View } from "react-native";
+import { Platform, View, StyleSheet } from "react-native";
 import { GiftedChat, Composer, InputToolbar } from "react-native-gifted-chat";
 import emojiUtils from "emoji-utils";
-import { ThemeContext } from "../utils/theme";
 
 import firebase from "../utils/firebase";
 import flatten from "lodash.flatten";
@@ -16,21 +15,24 @@ import dayjs from "dayjs";
 import Message from "../components/Message";
 import Screen from "../components/Screen";
 import IconButton from "../components/IconButton";
+import Loader from "../components/Loader";
+import Header from "../components/Header";
+import Type from "../components/Type";
 
 const LINE_HEIGHT = 25;
 
-export default function Chat() {
+export default function Chat({ navigation }) {
   const [messages, setMessages] = useState([]);
   const [location] = useGlobal("location");
   const [user] = useGlobal("user");
   const [messagesObj, setMessagesObj] = useState({});
-  const [text, setText] = useState("");
-  const theme = useContext(ThemeContext);
+  const [theme] = useGlobal("theme");
   const [height, setHeight] = useState(LINE_HEIGHT);
 
   const giftedChatRef = useRef(null);
-  const latLongID =
-    location.latitude.toFixed(2) + "+" + location.longitude.toFixed(2);
+  const latLongID = location
+    ? location.latitude.toFixed(2) + "+" + location.longitude.toFixed(2)
+    : "99.99+99.99";
 
   const ref = firebase.firestore().collection(`/messages/${latLongID}/list`);
 
@@ -217,50 +219,49 @@ export default function Chat() {
     );
   }
 
+  function renderLoading() {
+    return <Loader size={30} />;
+  }
+  const goToSettings = useCallback(() => {
+    navigation.navigate("settings");
+  }, [navigation]);
+
+  const renderFooter = () => <View style={{ height: 30 }}></View>;
   return (
     <Screen>
-      <View
-        style={{
-          // height: 20,
-          flexDirection: "row",
-          alignItems: "center",
-          // backgroundColor: "#00000090",
-          position: "absolute",
-          top: 5,
-          left: 10,
-          zIndex: 2,
-          // width: "100%",
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: theme.dark,
-            borderRadius: 9999,
-            width: 40,
-            height: 40,
-            alignItems: "center",
-            justifyContent: "center",
+      <Header onPress={goToSettings} />
+      {location && user ? (
+        <GiftedChat
+          messages={messages}
+          onSend={onSend}
+          user={{
+            _id: user.id,
+            name: user.name || "",
+            avatar: user.avatar,
           }}
-        >
-          <IconButton name="filter-sharp" lightMode round size={35} />
+          renderFooter={renderFooter}
+          ref={(ref) => (giftedChatRef.current = ref)}
+          renderMessage={renderMessage}
+          renderInputToolbar={renderInputToolbar}
+          renderComposer={renderComposer}
+          renderSend={renderSend}
+          renderLoading={renderLoading}
+          messagesContainerStyle={{ paddingTop: 25 }}
+        />
+      ) : (
+        <View style={styles.centerCenter}>
+          <Loader />
+          <Type>Connecting...</Type>
         </View>
-      </View>
-      <GiftedChat
-        messages={messages}
-        onSend={onSend}
-        user={{
-          _id: user.id,
-          name: user.name || "",
-          avatar: user.avatar,
-        }}
-        renderFooter={() => <View style={{ height: 30 }}></View>}
-        ref={(ref) => (giftedChatRef.current = ref)}
-        renderMessage={renderMessage}
-        renderInputToolbar={renderInputToolbar}
-        renderComposer={renderComposer}
-        renderSend={renderSend}
-        messagesContainerStyle={{ paddingTop: 25 }}
-      />
+      )}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  centerCenter: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

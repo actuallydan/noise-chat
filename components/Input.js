@@ -1,12 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useGlobal } from "reactn";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { ThemeContext } from "../utils/theme";
-
 export default function Input({ lightMode, ...props }) {
-  const theme = useContext(ThemeContext);
-
+  const [theme] = useGlobal("theme");
   const [isFocused, setIsFocused] = useState(false);
 
   const onFocus = () => {

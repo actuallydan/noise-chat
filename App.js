@@ -4,19 +4,26 @@ import { StyleSheet, View, Dimensions, Platform, LogBox } from "react-native";
 // import AppLoading from "expo-app-loading";
 import * as Location from "expo-location";
 import { useFonts } from "expo-font";
-
-import { theme, ThemeContext } from "./utils/theme";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { NavigationContainer } from "@react-navigation/native";
+import { defaultTheme } from "./utils/theme";
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
+const Stack = createStackNavigator();
 
 import Chat from "./screens/Chat";
 import Auth from "./screens/Auth";
-import LoaderTest from "./screens/LoaderTest";
+import Settings from "./screens/Settings";
+import { PortalHost } from "@gorhom/portal";
 
 // init reactn store
 setGlobal({
   location: null,
   user: null,
+  theme: defaultTheme,
 });
 
 if (process.env.NODE_ENV !== "production") {
@@ -27,8 +34,8 @@ export default function App() {
   const [errorMsg, setErrorMsg] = useState(null);
 
   const [location, setLocation] = useGlobal("location");
-  const [user] = useGlobal("user");
-
+  const [theme, setTheme] = useGlobal("theme");
+  const [appReady, setAppReady] = useState(false);
   const [, setDimensions] = useState({
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
@@ -40,12 +47,8 @@ export default function App() {
   });
 
   const updateTheme = (color) => {
-    theme.accent = color;
-    // also save the value in async storage for the future
-    AsyncStorage.setItem("accent-color");
+    setTheme({ ...theme, accent: color });
   };
-
-  theme.updateAccent = updateTheme;
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
@@ -68,22 +71,22 @@ export default function App() {
             coords: { latitude, longitude },
           } = newLocation;
 
-          console.log(
-            location,
-            latitude,
-            longitude,
-            location?.latitude === latitude,
-            location?.longitude === longitude
-          );
-
-          // TODO: only update if they aren't the within the same 0.01 degrees
-          setLocation({ latitude, longitude });
+          if (
+            location?.latitude !== latitude &&
+            location?.longitude !== longitude
+          ) {
+            setLocation({ latitude, longitude });
+          }
         }
       );
+
+      const color = await AsyncStorage.getItem("accent-color");
+      color && updateTheme(color);
     })();
 
     Dimensions.addEventListener("change", resize);
 
+    setAppReady(true);
     return () => {
       Dimensions.removeEventListener("change", resize);
       listener.remove();
@@ -111,17 +114,32 @@ export default function App() {
   }
 
   const containerStyle = [styles.container, { backgroundColor: theme.dark }];
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !appReady) {
     return null;
   } else {
     return (
-      <ThemeContext.Provider value={theme}>
-        <SafeAreaProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
           <View style={containerStyle} onLayout={onRotate}>
-            {user && location ? <Chat /> : <Auth />}
+            <PortalHost>
+              <Stack.Navigator
+                initialRouteName="auth"
+                screenOptions={{
+                  cardStyle: { backgroundColor: "transparent" },
+                  cardOverlayEnabled: false,
+                  headerShown: false,
+                }}
+                headerMode={"none"}
+              >
+                <Stack.Screen name="auth" component={Auth} />
+
+                <Stack.Screen name="chat" component={Chat} />
+                <Stack.Screen name="settings" component={Settings} />
+              </Stack.Navigator>
+            </PortalHost>
           </View>
-        </SafeAreaProvider>
-      </ThemeContext.Provider>
+        </NavigationContainer>
+      </SafeAreaProvider>
     );
   }
 }
