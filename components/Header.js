@@ -1,12 +1,16 @@
 import React, { useGlobal } from "reactn";
 import { View, StyleSheet } from "react-native";
 import IconButton from "./IconButton";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Header({ onPress, ...props }) {
   const [theme] = useGlobal("theme");
+  const insets = useSafeAreaInsets();
+
   const iconWrapperStyles = [
     styles.iconWrapper,
     { backgroundColor: theme.dark },
+    { top: insets.top },
   ];
 
   return (
