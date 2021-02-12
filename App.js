@@ -128,6 +128,7 @@ export default function App() {
                   cardStyle: { backgroundColor: "transparent" },
                   cardOverlayEnabled: false,
                   headerShown: false,
+                  ...TransitionPresets.ScaleFromCenterAndroid,
                 }}
                 headerMode={"none"}
               >
