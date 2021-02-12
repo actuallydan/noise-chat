@@ -16,7 +16,8 @@ const Stack = createStackNavigator();
 
 import Chat from "./screens/Chat";
 import Auth from "./screens/Auth";
-import Settings, { ColorSettings } from "./screens/Settings";
+import Settings from "./screens/Settings";
+import { PortalHost } from "@gorhom/portal";
 
 // init reactn store
 setGlobal({
@@ -33,7 +34,6 @@ export default function App() {
   const [errorMsg, setErrorMsg] = useState(null);
 
   const [location, setLocation] = useGlobal("location");
-  const [user] = useGlobal("user");
   const [theme, setTheme] = useGlobal("theme");
   const [appReady, setAppReady] = useState(false);
   const [, setDimensions] = useState({
@@ -71,16 +71,12 @@ export default function App() {
             coords: { latitude, longitude },
           } = newLocation;
 
-          console.log(
-            location,
-            latitude,
-            longitude,
-            location?.latitude === latitude,
-            location?.longitude === longitude
-          );
-
-          // TODO: only update if they aren't the within the same 0.01 degrees
-          setLocation({ latitude, longitude });
+          if (
+            location?.latitude !== latitude &&
+            location?.longitude !== longitude
+          ) {
+            setLocation({ latitude, longitude });
+          }
         }
       );
 
@@ -125,56 +121,22 @@ export default function App() {
       <SafeAreaProvider>
         <NavigationContainer>
           <View style={containerStyle} onLayout={onRotate}>
-            {/* {user && location ? <Chat /> : <Auth />} */}
-            <Stack.Navigator
-              initialRouteName="auth"
-              screenOptions={{
-                cardStyle: { backgroundColor: "transparent" },
-                cardOverlayEnabled: false,
-                headerShown: false,
-              }}
-              headerMode={"none"}
-            >
-              <Stack.Screen name="auth" component={Auth} />
-
-              <Stack.Screen name="chat" component={Chat} />
-              <Stack.Screen name="settings" component={Settings} />
-              {/* <Stack.Screen
-                name="colorSettings"
-                component={ColorSettings}
-                // options={({ route, navigation }) => ({
-                //   animationEnabled: true,
-                //   gestureEnabled: true,
-                //   cardOverlayEnabled: false,
-                //   cardStyle: { height: "50%" },
-                //   cardShadowEnabled: true,
-                //   ...TransitionPresets.ModalPresentationIOS,
-                // })}
-                
-                options={{
-                  
-                  headerShown: false,
+            <PortalHost>
+              <Stack.Navigator
+                initialRouteName="auth"
+                screenOptions={{
                   cardStyle: { backgroundColor: "transparent" },
-                  cardOverlayEnabled: true,
-                  cardStyleInterpolator: ({ current: { progress } }) => ({
-                    cardStyle: {
-                      opacity: progress.interpolate({
-                        inputRange: [0, 0.5, 0.9, 1],
-                        outputRange: [0, 0.25, 0.7, 1],
-                      }),
-                    },
-                    overlayStyle: {
-                      opacity: progress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 0.5],
-                        extrapolate: "clamp",
-                      }),
-                    },
-                  }),
-                  m
+                  cardOverlayEnabled: false,
+                  headerShown: false,
                 }}
-              /> */}
-            </Stack.Navigator>
+                headerMode={"none"}
+              >
+                <Stack.Screen name="auth" component={Auth} />
+
+                <Stack.Screen name="chat" component={Chat} />
+                <Stack.Screen name="settings" component={Settings} />
+              </Stack.Navigator>
+            </PortalHost>
           </View>
         </NavigationContainer>
       </SafeAreaProvider>

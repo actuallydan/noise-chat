@@ -224,8 +224,9 @@ export default function Chat({ navigation }) {
   }
   const goToSettings = useCallback(() => {
     navigation.navigate("settings");
-  });
+  }, [navigation]);
 
+  const renderFooter = () => <View style={{ height: 30 }}></View>;
   return (
     <Screen>
       <Header onPress={goToSettings} />
@@ -238,7 +239,7 @@ export default function Chat({ navigation }) {
             name: user.name || "",
             avatar: user.avatar,
           }}
-          renderFooter={() => <View style={{ height: 30 }}></View>}
+          renderFooter={renderFooter}
           ref={(ref) => (giftedChatRef.current = ref)}
           renderMessage={renderMessage}
           renderInputToolbar={renderInputToolbar}
