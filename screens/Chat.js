@@ -154,9 +154,10 @@ export default function Chat({ navigation }) {
           fontFamily: "Atkinson-Hyperlegible",
           borderWidth: 0,
           textAlignVertical: "center",
-          fontSize: 16,
+          fontSize: Platform.OS === "android" ? 16 : 20,
           lineHeight: LINE_HEIGHT,
           color: theme.accent,
+          justifyContent: "center",
         }}
       />
     );
@@ -229,7 +230,7 @@ export default function Chat({ navigation }) {
   const renderFooter = () => <View style={{ height: 30 }}></View>;
   return (
     <Screen>
-      <Header onPress={goToSettings} />
+      <Header onPress={goToSettings} topIcon={"filter-sharp"} />
       {location && user ? (
         <GiftedChat
           messages={messages}
@@ -246,7 +247,7 @@ export default function Chat({ navigation }) {
           renderComposer={renderComposer}
           renderSend={renderSend}
           renderLoading={renderLoading}
-          messagesContainerStyle={{ paddingTop: 25 }}
+          messagesContainerStyle={styles.paddingForHeader}
         />
       ) : (
         <View style={styles.centerCenter}>
@@ -264,4 +265,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  paddingForHeader: { paddingTop: 25 },
 });
