@@ -6,9 +6,8 @@ import React, {
   useCallback,
 } from "reactn";
 import { Platform, View, StyleSheet, KeyboardAvoidingView } from "react-native";
-import { GiftedChat, Composer, InputToolbar } from "react-native-gifted-chat";
+import { GiftedChat } from "react-native-gifted-chat";
 import emojiUtils from "emoji-utils";
-import KeyboardSpacer from "react-native-keyboard-spacer";
 import { uuid } from "../utils/common";
 
 import firebase from "../utils/firebase";
@@ -36,6 +35,8 @@ export default function Chat({ navigation }) {
   const latLongID = location
     ? location.latitude.toFixed(2) + "+" + location.longitude.toFixed(2)
     : "99.99+99.99";
+
+  // example latLongID = 38.93+-77.03
 
   const ref = firebase.firestore().collection(`/messages/${latLongID}/list`);
 
@@ -69,8 +70,6 @@ export default function Chat({ navigation }) {
     );
 
     // Update our messages array
-    // Wait why do we have 2 places where the messages live?
-    GiftedChat.append([], sortedMessages);
     setMessages(sortedMessages);
   }, [messagesObj]);
 
@@ -111,8 +110,8 @@ export default function Chat({ navigation }) {
     return () => unsubs.forEach((u) => u());
   }, [latLongID]);
 
-  async function onSend(messages = []) {
-    messages.forEach(async (m) => {
+  function onSend(messages = []) {
+    messages.forEach((m) => {
       if (m.text.trim() === "") {
         return;
       }
@@ -124,13 +123,12 @@ export default function Chat({ navigation }) {
       };
 
       // optimisticaly update UI to append our new message while it uploads
-      const newTempMessages = messages;
-      newTempMessages.push(newObj);
-      GiftedChat.append([], newTempMessages);
-      setMessages(newTempMessages);
+      // const newTempMessages = messages;
+      // newTempMessages.push(newObj);
+      // setMessages(newTempMessages);
 
       // instead of using .doc(newID).set(data) we could have used .add(data), but then we wouldn't ahve control of it's ID
-      await ref.doc(m._id).set(newObj);
+      ref.doc(m._id).set(newObj);
     });
   }
 
@@ -244,7 +242,6 @@ export default function Chat({ navigation }) {
               name: user.name || "",
               avatar: user.avatar,
             }}
-            // renderFooter={renderFooter}
             ref={(ref) => (giftedChatRef.current = ref)}
             renderMessage={renderMessage}
             renderInputToolbar={() => {
@@ -256,11 +253,9 @@ export default function Chat({ navigation }) {
             renderSend={renderSend}
             renderLoading={renderLoading}
             messagesContainerStyle={styles.paddingForHeader}
-            // bottomOffset={Platform.OS === "ios" ? -10 : 0}
           />
         </View>
       )}
-      {/* {Platform.OS === "ios" && <KeyboardSpacer topSpacing={-300} />} */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "position" : "height"}
       >

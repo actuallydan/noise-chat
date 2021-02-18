@@ -150,11 +150,7 @@ export function ColorSettings() {
       </Pressable>
       <Type>Or enter a color manually</Type>
 
-      <Input
-        defaultValue={theme.accent}
-        value={color.substring(0, 6)}
-        onChangeText={setColor}
-      />
+      <Input value={color.substring(0, 6)} onChangeText={setColor} />
       <SmallType style={styles.marginBottom}>
         Accepts 6-digit HEX values
       </SmallType>

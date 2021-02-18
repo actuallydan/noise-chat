@@ -142,7 +142,11 @@ export default function App() {
 
   if (errorMsg || !locationPermissionAllowed) {
     errorMsg && console.error(errorMsg);
-    return <LocationError />;
+    return (
+      <View style={containerStyle} onLayout={onRotate}>
+        <LocationError />
+      </View>
+    );
   }
 
   // otherwise display app as normal
