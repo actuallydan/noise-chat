@@ -60,7 +60,7 @@ export default function Chat({ navigation }) {
   // Boy howdy this bit is DENSE
   useEffect(() => {
     // Get all the messages as an object of {tileId: messages[], tileId:message[]}
-    // Flatten them with lodash because CoreJS doesn't have flat() :eyeroll
+    // Flatten them with lodash because CoreJS doesn't have Array.flat() :eyeroll
     const flattenedTempMessages = flatten(Object.values(messagesObj));
 
     // Sort them by unix timestamp
@@ -69,6 +69,7 @@ export default function Chat({ navigation }) {
     );
 
     // Update our messages array
+    // Wait why do we have 2 places where the messages live?
     GiftedChat.append([], sortedMessages);
     setMessages(sortedMessages);
   }, [messagesObj]);
@@ -108,7 +109,7 @@ export default function Chat({ navigation }) {
 
     // I'm not totally sure this works this way, but try to unsub from all the listeners at once?
     return () => unsubs.forEach((u) => u());
-  }, []);
+  }, [latLongID]);
 
   async function onSend(messages = []) {
     messages.forEach(async (m) => {
@@ -122,28 +123,25 @@ export default function Chat({ navigation }) {
         createdAt: new Date().toJSON(),
       };
 
+      // optimisticaly update UI to append our new message while it uploads
+      const newTempMessages = messages;
+      newTempMessages.push(newObj);
+      GiftedChat.append([], newTempMessages);
+      setMessages(newTempMessages);
+
       // instead of using .doc(newID).set(data) we could have used .add(data), but then we wouldn't ahve control of it's ID
       await ref.doc(m._id).set(newObj);
     });
-
-    // save in firestore
-
-    //     createdAt: t {seconds: 1603684800, nanoseconds: 0}
-    // id: "sd87f6b9sdf"
-    // lat: 38.93
-    // long: -77.02
-    // text: "test"
-    // user: "s8d7f65v8s7d65f"
   }
 
   function renderComposer(props) {
-    const onInputSizeChanged = ({ height }) => {
-      height = Math.round(height / LINE_HEIGHT) * LINE_HEIGHT;
-      // enforce max composer height
-      if (height < 150) {
-        setHeight(height);
-      }
-    };
+    // const onInputSizeChanged = ({ height }) => {
+    //   height = Math.round(height / LINE_HEIGHT) * LINE_HEIGHT;
+    //   // enforce max composer height
+    //   if (height < 150) {
+    //     setHeight(height);
+    //   }
+    // };
     const _onSend = () => {
       const newMessage = {
         _id: uuid(),
@@ -184,22 +182,6 @@ export default function Chat({ navigation }) {
         placeholder="Type Message..."
       />
     );
-  }
-  function renderInputToolbar({ children, ...props }) {
-    const containerStyle = {
-      borderColor: theme.accent,
-      backgroundColor: theme.dark,
-      marginVertical: 5,
-      borderWidth: 3,
-      borderRadius: 10,
-      padding: 8,
-      borderTopColor: theme.accent,
-      borderTopWidth: 3,
-      flexDirection: "row",
-      alignItems: "center",
-      // something needs to be done here to make it run on web...
-    };
-    return <InputToolbar {...props} containerStyle={containerStyle} />;
   }
 
   function renderSend(props) {
@@ -249,11 +231,10 @@ export default function Chat({ navigation }) {
     navigation.navigate("settings");
   }, [navigation]);
 
-  const renderFooter = () => <View style={{ height: 30 }}></View>;
   return (
     <Screen style={{ justifyContent: "flex-end" }}>
       <Header onPress={goToSettings} topIcon={"filter-sharp"} />
-      {location && user ? (
+      {location && user && (
         <View style={{ flexGrow: 1 }}>
           <GiftedChat
             messages={messages}
@@ -278,8 +259,6 @@ export default function Chat({ navigation }) {
             // bottomOffset={Platform.OS === "ios" ? -10 : 0}
           />
         </View>
-      ) : (
-        renderLoading()
       )}
       {/* {Platform.OS === "ios" && <KeyboardSpacer topSpacing={-300} />} */}
       <KeyboardAvoidingView
