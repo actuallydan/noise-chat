@@ -155,6 +155,7 @@ export default function Chat({ navigation }) {
         text,
       };
       onSend([newMessage]);
+      setText("");
     };
     return (
       // <Composer
