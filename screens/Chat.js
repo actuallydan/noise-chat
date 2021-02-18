@@ -5,9 +5,11 @@ import React, {
   useRef,
   useCallback,
 } from "reactn";
-import { Platform, View, StyleSheet } from "react-native";
+import { Platform, View, StyleSheet, KeyboardAvoidingView } from "react-native";
 import { GiftedChat, Composer, InputToolbar } from "react-native-gifted-chat";
 import emojiUtils from "emoji-utils";
+import KeyboardSpacer from "react-native-keyboard-spacer";
+import { uuid } from "../utils/common";
 
 import firebase from "../utils/firebase";
 import flatten from "lodash.flatten";
@@ -18,6 +20,7 @@ import IconButton from "../components/IconButton";
 import Loader from "../components/Loader";
 import Header from "../components/Header";
 import Type from "../components/Type";
+import BigInput from "../components/BigInput";
 
 const LINE_HEIGHT = 25;
 
@@ -28,7 +31,7 @@ export default function Chat({ navigation }) {
   const [messagesObj, setMessagesObj] = useState({});
   const [theme] = useGlobal("theme");
   const [height, setHeight] = useState(LINE_HEIGHT);
-
+  const [text, setText] = useState("");
   const giftedChatRef = useRef(null);
   const latLongID = location
     ? location.latitude.toFixed(2) + "+" + location.longitude.toFixed(2)
@@ -112,7 +115,6 @@ export default function Chat({ navigation }) {
       if (m.text.trim() === "") {
         return;
       }
-      // const newID = uuidv4();
       const newObj = {
         ...m,
         lat: location.latitude,
@@ -142,23 +144,43 @@ export default function Chat({ navigation }) {
         setHeight(height);
       }
     };
+    const _onSend = () => {
+      const newMessage = {
+        _id: uuid(),
+        user: {
+          _id: user.id,
+          name: user.name || "",
+          avatar: user.avatar,
+        },
+        text,
+      };
+      onSend([newMessage]);
+    };
     return (
-      <Composer
-        {...props}
+      // <Composer
+      //   // {...props}
+      //   onSend={_onSend}
+      //   placeholderTextColor={theme.accent + "99"}
+      //   placeholder="Type Message..."
+      //   onInputSizeChanged={onInputSizeChanged}
+      //   composerHeight={text.trim() === "" ? LINE_HEIGHT : height}
+      //   underlineColorAndroid={"transparent"}
+      //   textInputStyle={{
+      //     fontFamily: "Atkinson-Hyperlegible",
+      //     borderWidth: 0,
+      //     textAlignVertical: "center",
+      //     fontSize: Platform.OS === "android" ? 16 : 20,
+      //     lineHeight: LINE_HEIGHT,
+      //     color: theme.accent,
+      //     justifyContent: "center",
+      //   }}
+      // />
+      <BigInput
+        value={text}
+        onChangeText={setText}
+        onPress={_onSend}
         placeholderTextColor={theme.accent + "99"}
         placeholder="Type Message..."
-        onInputSizeChanged={onInputSizeChanged}
-        composerHeight={props.text.trim() === "" ? LINE_HEIGHT : height}
-        underlineColorAndroid={"transparent"}
-        textInputStyle={{
-          fontFamily: "Atkinson-Hyperlegible",
-          borderWidth: 0,
-          textAlignVertical: "center",
-          fontSize: Platform.OS === "android" ? 16 : 20,
-          lineHeight: LINE_HEIGHT,
-          color: theme.accent,
-          justifyContent: "center",
-        }}
       />
     );
   }
@@ -176,13 +198,7 @@ export default function Chat({ navigation }) {
       alignItems: "center",
       // something needs to be done here to make it run on web...
     };
-    return (
-      <InputToolbar
-        nativeID="uguhguh"
-        {...props}
-        containerStyle={containerStyle}
-      />
-    );
+    return <InputToolbar {...props} containerStyle={containerStyle} />;
   }
 
   function renderSend(props) {
@@ -221,7 +237,12 @@ export default function Chat({ navigation }) {
   }
 
   function renderLoading() {
-    return <Loader size={30} />;
+    return (
+      <View style={styles.centerCenter}>
+        <Loader size={30} />
+        <Type>Connecting...</Type>
+      </View>
+    );
   }
   const goToSettings = useCallback(() => {
     navigation.navigate("settings");
@@ -229,32 +250,42 @@ export default function Chat({ navigation }) {
 
   const renderFooter = () => <View style={{ height: 30 }}></View>;
   return (
-    <Screen>
+    <Screen style={{ justifyContent: "flex-end" }}>
       <Header onPress={goToSettings} topIcon={"filter-sharp"} />
       {location && user ? (
-        <GiftedChat
-          messages={messages}
-          onSend={onSend}
-          user={{
-            _id: user.id,
-            name: user.name || "",
-            avatar: user.avatar,
-          }}
-          renderFooter={renderFooter}
-          ref={(ref) => (giftedChatRef.current = ref)}
-          renderMessage={renderMessage}
-          renderInputToolbar={renderInputToolbar}
-          renderComposer={renderComposer}
-          renderSend={renderSend}
-          renderLoading={renderLoading}
-          messagesContainerStyle={styles.paddingForHeader}
-        />
-      ) : (
-        <View style={styles.centerCenter}>
-          <Loader />
-          <Type>Connecting...</Type>
+        <View style={{ flexGrow: 1 }}>
+          <GiftedChat
+            messages={messages}
+            onSend={onSend}
+            user={{
+              _id: user.id,
+              name: user.name || "",
+              avatar: user.avatar,
+            }}
+            // renderFooter={renderFooter}
+            ref={(ref) => (giftedChatRef.current = ref)}
+            renderMessage={renderMessage}
+            renderInputToolbar={() => {
+              <View style={{ height: 0, width: 0 }}></View>;
+            }}
+            renderComposer={() => {
+              <View style={{ height: 0, width: 0 }}></View>;
+            }}
+            renderSend={renderSend}
+            renderLoading={renderLoading}
+            messagesContainerStyle={styles.paddingForHeader}
+            // bottomOffset={Platform.OS === "ios" ? -10 : 0}
+          />
         </View>
+      ) : (
+        renderLoading()
       )}
+      {/* {Platform.OS === "ios" && <KeyboardSpacer topSpacing={-300} />} */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "position" : "height"}
+      >
+        {renderComposer()}
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
@@ -262,8 +293,9 @@ export default function Chat({ navigation }) {
 const styles = StyleSheet.create({
   centerCenter: {
     flex: 1,
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
   },
-  paddingForHeader: { paddingTop: 25 },
+  paddingForHeader: { paddingTop: 25, flexGrow: 1 },
 });
