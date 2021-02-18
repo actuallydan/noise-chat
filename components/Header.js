@@ -1,19 +1,27 @@
 import React, { useGlobal } from "reactn";
 import { View, StyleSheet } from "react-native";
 import IconButton from "./IconButton";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function Header({ onPress, ...props }) {
+export default function Header({
+  onPress,
+  topIcon = "filter-sharp",
+  ...props
+}) {
   const [theme] = useGlobal("theme");
+  const insets = useSafeAreaInsets();
+
   const iconWrapperStyles = [
     styles.iconWrapper,
     { backgroundColor: theme.dark },
+    { top: insets.top },
   ];
 
   return (
     <View style={styles.headerView}>
       <View style={[iconWrapperStyles]}>
         <IconButton
-          name="filter-sharp"
+          name={topIcon}
           lightMode
           round
           size={35}

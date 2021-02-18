@@ -1,19 +1,35 @@
-import React, { useEffect, useState, useGlobal, useCallback } from "reactn";
+import React, {
+  useEffect,
+  useState,
+  useGlobal,
+  useCallback,
+  useRef,
+  useContext,
+} from "reactn";
 
-import { View, StyleSheet, Modal, Dimensions, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Modal,
+  Dimensions,
+  ScrollView,
+  Pressable,
+} from "react-native";
 import Screen from "../components/Screen";
 import Type from "../components/Type";
 import IconButton from "../components/IconButton";
 import Input from "../components/Input";
 import SmallType from "../components/SmallType";
-import { TriangleColorPicker, fromHsv } from "react-native-color-picker";
 import Button from "../components/Button";
 import { defaultTheme } from "../utils/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BottomSheet from "../components/BottomSheet";
+import BottomSheet, { BottomContext } from "../components/BottomSheet";
 import { Portal } from "@gorhom/portal";
 import { userIconList } from "../utils/user-icon-list";
 import firebase from "../utils/firebase";
+import Header from "../components/Header";
+// import { TriangleColorPicker, fromHsv } from "react-native-color-picker";
+import ColorPicker from "react-native-wheel-color-picker";
 
 export default function Settings({ navigation }) {
   const [user, setUser] = useGlobal("user");
@@ -36,33 +52,42 @@ export default function Settings({ navigation }) {
     setShowIconModal(false);
   }
 
+  function goBack() {
+    navigation.goBack();
+  }
+
   return (
     <Screen style={styles.wrapper}>
-      <Type style={{ fontSize: 25, marginVertical: 20 }}>Settings</Type>
+      <Header onPress={goBack} topIcon={"chevron-back-sharp"} />
+      <View style={[styles.wrapper, styles.paddingForHeader]}>
+        <Type style={{ fontSize: 25, marginBottom: 20, marginTop: 35 }}>
+          Settings
+        </Type>
 
-      <Type style={{ fontSize: 18 }}>User Icon:</Type>
-      <IconButton
-        name={user.avatar}
-        size={60}
-        containerStyle={styles.marginBottom}
-        onPress={goToIconSettings}
-      />
-      <Portal>
-        <Modal transparent visible={showIconModal}>
-          <BottomSheet closeModal={closeIconModal}>
-            <IconSettings closeIconModal={closeIconModal} />
-          </BottomSheet>
-        </Modal>
-      </Portal>
-      <Type style={{ fontSize: 18 }}>Theme Color:</Type>
-      <Button onPress={goToColorSettings}>EDIT COLOR</Button>
-      <Portal>
-        <Modal transparent visible={showColorModal}>
-          <BottomSheet closeModal={closeColorModal}>
-            <ColorSettings />
-          </BottomSheet>
-        </Modal>
-      </Portal>
+        <Type style={{ fontSize: 18 }}>User Icon:</Type>
+        <IconButton
+          name={user.avatar}
+          size={60}
+          containerStyle={styles.marginBottom}
+          onPress={goToIconSettings}
+        />
+        <Portal>
+          <Modal transparent visible={showIconModal}>
+            <BottomSheet closeModal={closeIconModal}>
+              <IconSettings closeIconModal={closeIconModal} />
+            </BottomSheet>
+          </Modal>
+        </Portal>
+        <Type style={{ fontSize: 18 }}>Theme Color:</Type>
+        <Button onPress={goToColorSettings}>EDIT COLOR</Button>
+        <Portal>
+          <Modal transparent visible={showColorModal}>
+            <BottomSheet closeModal={closeColorModal}>
+              <ColorSettings />
+            </BottomSheet>
+          </Modal>
+        </Portal>
+      </View>
     </Screen>
   );
 }
@@ -72,6 +97,8 @@ export function ColorSettings() {
 
   const [color, setColor] = useState(theme.accent.replace("#", ""));
   const user = firebase.auth().currentUser;
+  const context = useContext(BottomContext);
+  const colorPickerRef = useRef();
 
   useEffect(() => {
     if (color.length === 6 && color !== theme.accent.replace("#", "")) {
@@ -84,7 +111,7 @@ export function ColorSettings() {
   }, [theme]);
 
   function updateColor(color) {
-    saveColor(fromHsv(color));
+    saveColor(color);
   }
 
   function setToDefault() {
@@ -97,23 +124,33 @@ export function ColorSettings() {
     // also save the value in async storage for the future
     AsyncStorage.setItem("accent-color", color);
   }
+  const disableScroll = () => {
+    context.setScrollable(false);
+  };
+  const enableScroll = () => {
+    context.setScrollable(true);
+  };
   return (
     <View style={styles.wrapper}>
       <Type style={{ fontSize: 18 }}>Theme Color:</Type>
       <Type>Use the wheel to pick a different accent color</Type>
 
-      <TriangleColorPicker
-        onColorChange={updateColor}
-        style={[{ flex: 1 }, styles.marginBottom]}
-        color={theme.accent}
-      />
+      {/* Pressable is required to disable scrolling on BottomSheet ScrollView when selecting a color */}
+      <Pressable onTouchStart={disableScroll} onTouchEnd={enableScroll}>
+        <ColorPicker
+          ref={(r) => {
+            colorPickerRef.current = r;
+          }}
+          color={theme.accent}
+          onColorChangeComplete={updateColor}
+          thumbSize={40}
+          sliderSize={20}
+          noSnap={false}
+        />
+      </Pressable>
       <Type>Or enter a color manually</Type>
 
-      <Input
-        defaultValue={theme.accent}
-        value={color.substring(0, 6)}
-        onChangeText={setColor}
-      />
+      <Input value={color.substring(0, 6)} onChangeText={setColor} />
       <SmallType style={styles.marginBottom}>
         Accepts 6-digit HEX values
       </SmallType>
@@ -135,6 +172,7 @@ export function IconSettings({ closeIconModal }) {
       <ScrollView contentContainerStyle={styles.containerStyle}>
         {userIconList.map((icon) => (
           <IconButtonWrapped
+            key={icon}
             icon={icon}
             onPress={updateIcon}
             isSelected={icon === user.avatar}
@@ -178,4 +216,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
   },
+  paddingForHeader: { paddingTop: 25 },
 });

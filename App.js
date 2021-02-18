@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useGlobal, setGlobal } from "reactn";
+import React, {
+  useState,
+  useEffect,
+  useGlobal,
+  setGlobal,
+  useRef,
+} from "reactn";
 
 import { StyleSheet, View, Dimensions, Platform, LogBox } from "react-native";
 // import AppLoading from "expo-app-loading";
@@ -17,6 +23,7 @@ const Stack = createStackNavigator();
 import Chat from "./screens/Chat";
 import Auth from "./screens/Auth";
 import Settings from "./screens/Settings";
+import LocationError from "./screens/LocationError";
 import { PortalHost } from "@gorhom/portal";
 
 // init reactn store
@@ -24,6 +31,7 @@ setGlobal({
   location: null,
   user: null,
   theme: defaultTheme,
+  locationPermissionAllowed: true,
 });
 
 if (process.env.NODE_ENV !== "production") {
@@ -33,6 +41,9 @@ if (process.env.NODE_ENV !== "production") {
 export default function App() {
   const [errorMsg, setErrorMsg] = useState(null);
 
+  const [locationPermissionAllowed, setLocationPermissionsAllowed] = useGlobal(
+    "locationPermissionAllowed"
+  );
   const [location, setLocation] = useGlobal("location");
   const [theme, setTheme] = useGlobal("theme");
   const [appReady, setAppReady] = useState(false);
@@ -40,6 +51,8 @@ export default function App() {
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
   });
+
+  const locationRef = useRef({ remove: () => {} });
 
   const [fontsLoaded] = useFonts({
     "Atkinson-Hyperlegible": require("./assets/fonts/Atkinson-Hyperlegible.otf"),
@@ -52,34 +65,7 @@ export default function App() {
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
-    let listener = { remove: () => {} };
     (async () => {
-      let { status } = await Location.requestPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-      }
-
-      // let location = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Low});
-      listener = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.Low,
-          // re-poll
-          timeInterval: 60000,
-        },
-        (newLocation) => {
-          const {
-            coords: { latitude, longitude },
-          } = newLocation;
-
-          if (
-            location?.latitude !== latitude &&
-            location?.longitude !== longitude
-          ) {
-            setLocation({ latitude, longitude });
-          }
-        }
-      );
-
       const color = await AsyncStorage.getItem("accent-color");
       color && updateTheme(color);
     })();
@@ -89,9 +75,49 @@ export default function App() {
     setAppReady(true);
     return () => {
       Dimensions.removeEventListener("change", resize);
-      listener.remove();
     };
   }, []);
+
+  const watchLocation = async () => {
+    let { status } = await Location.requestPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
+      setLocationPermissionsAllowed(false);
+      return;
+    }
+
+    // let location = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Low});
+    locationRef.current = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.Low,
+        // re-poll
+        timeInterval: 60000,
+      },
+      (newLocation) => {
+        const {
+          coords: { latitude, longitude },
+        } = newLocation;
+
+        if (
+          location?.latitude !== latitude &&
+          location?.longitude !== longitude
+        ) {
+          setLocation({ latitude, longitude });
+        }
+      }
+    );
+  };
+
+  // set up app to listen to location if allowed
+  useEffect(() => {
+    if (locationPermissionAllowed) {
+      watchLocation();
+    }
+
+    return () => {
+      locationRef.current.remove();
+    };
+  }, [locationPermissionAllowed]);
 
   // on browser resize, or in the bizarre case of the app resizing on a tablet or some nonsense
   const resize = ({ window }) => {
@@ -109,39 +135,46 @@ export default function App() {
     });
   };
 
-  if (errorMsg) {
-    console.error(errorMsg);
-  }
-
   const containerStyle = [styles.container, { backgroundColor: theme.dark }];
   if (!fontsLoaded || !appReady) {
     return null;
-  } else {
-    return (
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <View style={containerStyle} onLayout={onRotate}>
-            <PortalHost>
-              <Stack.Navigator
-                initialRouteName="auth"
-                screenOptions={{
-                  cardStyle: { backgroundColor: "transparent" },
-                  cardOverlayEnabled: false,
-                  headerShown: false,
-                }}
-                headerMode={"none"}
-              >
-                <Stack.Screen name="auth" component={Auth} />
+  }
 
-                <Stack.Screen name="chat" component={Chat} />
-                <Stack.Screen name="settings" component={Settings} />
-              </Stack.Navigator>
-            </PortalHost>
-          </View>
-        </NavigationContainer>
-      </SafeAreaProvider>
+  if (errorMsg || !locationPermissionAllowed) {
+    errorMsg && console.error(errorMsg);
+    return (
+      <View style={containerStyle} onLayout={onRotate}>
+        <LocationError />
+      </View>
     );
   }
+
+  // otherwise display app as normal
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <View style={containerStyle} onLayout={onRotate}>
+          <PortalHost>
+            <Stack.Navigator
+              initialRouteName="auth"
+              screenOptions={{
+                cardStyle: { backgroundColor: "transparent" },
+                cardOverlayEnabled: false,
+                headerShown: false,
+                ...TransitionPresets.ScaleFromCenterAndroid,
+              }}
+              headerMode={"none"}
+            >
+              <Stack.Screen name="auth" component={Auth} />
+
+              <Stack.Screen name="chat" component={Chat} />
+              <Stack.Screen name="settings" component={Settings} />
+            </Stack.Navigator>
+          </PortalHost>
+        </View>
+      </NavigationContainer>
+    </SafeAreaProvider>
+  );
 }
 
 const styles = StyleSheet.create({

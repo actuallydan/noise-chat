@@ -46,8 +46,9 @@ export default function BigInput({ lightMode, onPress = () => {}, ...props }) {
         <IconButton
           name="chevron-forward-sharp"
           size={25}
-          lightMode
           onPress={onPress}
+          lightMode={props.value}
+          disabled={!props.value}
         />
       </View>
     </TouchableOpacity>
