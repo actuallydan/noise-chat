@@ -1,6 +1,6 @@
-import React, { useEffect, useGlobal } from "reactn";
+import React, { useEffect, useGlobal, useRef } from "reactn";
 import { View, StyleSheet } from "react-native";
-import firebase from "../utils/firebase";
+import firebase, { firebaseConfig } from "../utils/firebase";
 import Type from "../components/Type";
 import Loader from "../components/Loader";
 import randomName from "../utils/getRandomName";
@@ -12,7 +12,7 @@ import { StackActions } from "@react-navigation/native";
 export default function Auth({ navigation }) {
   const [, setUser] = useGlobal("user");
 
-  function authorize() {
+  async function authorize() {
     return new Promise((resolve, reject) => {
       firebase
         .auth()
@@ -34,25 +34,24 @@ export default function Auth({ navigation }) {
 
   useEffect(() => {
     init();
-    firebase.auth().onAuthStateChanged(function (user) {
+    firebase.auth().onAuthStateChanged(async function (user) {
       if (user) {
-        // User is signed in.
-        const uid = user.uid;
-        const name = randomName();
+        if (!user.photoURL) {
+          await user.updateProfile({
+            photoURL: getRandomIcon(),
+          });
+        }
 
-        setUser(
-          {
-            id: uid,
-            name,
-            avatar: getRandomIcon(),
-          },
-          () => {
-            navigation.dispatch(StackActions.replace("chat"));
-          }
-        );
+        if (!user.displayName) {
+          await user.updateProfile({
+            displayName: randomName(),
+          });
+        }
+
+        navigation.dispatch(StackActions.replace("chat"));
       } else {
-        // User is signed out.
-        setUser(null);
+        // User is signed out
+        // Not sure what to do here?
       }
     });
   }, []);
@@ -67,6 +66,12 @@ export default function Auth({ navigation }) {
         <Loader />
         <Type>Connecting...</Type>
       </View>
+      {/* <FirebaseRecaptchaVerifierModal
+        ref={firebaseRef}
+        firebaseConfig={firebaseConfig}
+        attemptInvisibleVerification={true}
+      /> */}
+      {/* <FirebaseRecaptchaBanner /> */}
     </Screen>
   );
 }

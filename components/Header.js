@@ -13,8 +13,13 @@ export default function Header({
 
   const iconWrapperStyles = [
     styles.iconWrapper,
-    { backgroundColor: theme.dark },
-    { top: insets.top },
+    {
+      backgroundColor: theme.dark,
+      top: insets.top,
+      borderRadius: 9999,
+      borderWidth: 3,
+      borderColor: theme.dark,
+    },
   ];
 
   return (
@@ -36,6 +41,7 @@ const styles = StyleSheet.create({
   headerView: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     position: "absolute",
     top: 5,
     left: 10,

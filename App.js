@@ -7,7 +7,6 @@ import React, {
 } from "reactn";
 
 import { StyleSheet, View, Dimensions, Platform, LogBox } from "react-native";
-// import AppLoading from "expo-app-loading";
 import * as Location from "expo-location";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,12 +23,13 @@ import Chat from "./screens/Chat";
 import Auth from "./screens/Auth";
 import Settings from "./screens/Settings";
 import LocationError from "./screens/LocationError";
+import LinkPhone from "./screens/LinkPhone";
+
 import { PortalHost } from "@gorhom/portal";
 
 // init reactn store
 setGlobal({
   location: null,
-  user: null,
   theme: defaultTheme,
   locationPermissionAllowed: true,
 });
@@ -65,10 +65,12 @@ export default function App() {
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
-    (async () => {
+    async function init() {
       const color = await AsyncStorage.getItem("accent-color");
       color && updateTheme(color);
-    })();
+    }
+
+    init();
 
     Dimensions.addEventListener("change", resize);
 
@@ -140,6 +142,8 @@ export default function App() {
     return null;
   }
 
+  // return <ExamplePhoneAuth />;
+
   if (errorMsg || !locationPermissionAllowed) {
     errorMsg && console.error(errorMsg);
     return (
@@ -156,7 +160,7 @@ export default function App() {
         <View style={containerStyle} onLayout={onRotate}>
           <PortalHost>
             <Stack.Navigator
-              initialRouteName="auth"
+              initialRouteName="chat"
               screenOptions={{
                 cardStyle: { backgroundColor: "transparent" },
                 cardOverlayEnabled: false,
@@ -169,6 +173,7 @@ export default function App() {
 
               <Stack.Screen name="chat" component={Chat} />
               <Stack.Screen name="settings" component={Settings} />
+              <Stack.Screen name="linkPhone" component={LinkPhone} />
             </Stack.Navigator>
           </PortalHost>
         </View>

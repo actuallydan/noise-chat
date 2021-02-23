@@ -1,11 +1,12 @@
 import React, { memo } from "react";
-import { StyleSheet, View, Text, Platform, Image } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import Day from "./Day";
 import dayjs from "dayjs";
 import Type from "./Type";
 import Card from "./Card";
 import SmallType from "./SmallType";
 import IconButton from "./IconButton";
+import emojiUtils from "emoji-utils";
 
 const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
   const timestamp = dayjs(currentMessage.createdAt).format("LT");
@@ -72,9 +73,13 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
               <SmallType>{timestamp}</SmallType>
             </View>
           )}
-          <Card lightMode={isMine}>
-            <Type lightMode={isMine}>{currentMessage.text}</Type>
-          </Card>
+          {emojiUtils.isPureEmojiString(currentMessage.text) ? (
+            <Text style={{ fontSize: 45 }}>{currentMessage.text}</Text>
+          ) : (
+            <Card lightMode={isMine}>
+              <Type lightMode={isMine}>{currentMessage.text}</Type>
+            </Card>
+          )}
         </View>
       </View>
     </View>

@@ -1,17 +1,17 @@
-# Quibble
+# Noise
 
 A YikYak clone if, instead of being hyperlocal Reddit, it was just a hyperlocal chatroom.
 
 Purely just a project to work on an end-to-end publishing something to Android/iOS app store.
 
-![Demo](./assets-for-readme/quibble-alpha.gif)
+![Demo](./assets-for-readme/noise-alpha-2.gif)
 
 # Installation
 
 Being built with Expo, this project requires the latest `expo-cli` with `npm install -g expo-cli`
 
 ```
-git clone https://github.com/actuallydan/quibble.git
+git clone https://github.com/actuallydan/noise0chat.git
 npm install
 ```
 
@@ -64,3 +64,12 @@ git commit -m 'feat(images): add new splash image'
 git pull --rebase origin main
 git push origin
 ```
+
+# A Smattering of other pictures
+
+![Demo](./assets-for-readme/chat-theme.png)
+![Demo](./assets-for-readme/chat-green.png)
+![Demo](./assets-for-readme/color-theme.png)
+![Demo](./assets-for-readme/color-green.png)
+![Demo](./assets-for-readme/color-purp.png)
+![Demo](./assets-for-readme/icons.png)

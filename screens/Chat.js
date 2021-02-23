@@ -10,7 +10,7 @@ import { GiftedChat } from "react-native-gifted-chat";
 import emojiUtils from "emoji-utils";
 import { uuid } from "../utils/common";
 
-import firebase from "../utils/firebase";
+import firebase, { firebaseConfig } from "../utils/firebase";
 import flatten from "lodash.flatten";
 import dayjs from "dayjs";
 import Message from "../components/Message";
@@ -21,12 +21,30 @@ import Header from "../components/Header";
 import Type from "../components/Type";
 import BigInput from "../components/BigInput";
 
+import { useAuthState } from "react-firebase-hooks/auth";
+import Button from "../components/Button";
+
 const LINE_HEIGHT = 25;
 
 export default function Chat({ navigation }) {
   const [messages, setMessages] = useState([]);
   const [location] = useGlobal("location");
-  const [user] = useGlobal("user");
+
+  // user returned from hook is read-only so that's why we need this bass-ackwards pageantry mis-direction
+  const [firebaseUser] = useAuthState(firebase.auth());
+
+  let user = null;
+  // if the user isn't logged in, give the app some default data
+  if (!firebaseUser) {
+    user = {
+      displayName: "",
+      photoURL: "person-circle-sharp",
+      uid: "",
+    };
+  } else {
+    user = firebaseUser;
+  }
+
   const [messagesObj, setMessagesObj] = useState({});
   const [theme] = useGlobal("theme");
   const [height, setHeight] = useState(LINE_HEIGHT);
@@ -144,9 +162,9 @@ export default function Chat({ navigation }) {
       const newMessage = {
         _id: uuid(),
         user: {
-          _id: user.id,
-          name: user.name || "",
-          avatar: user.avatar,
+          _id: user.uid,
+          name: user.displayName || "",
+          avatar: user.photoURL,
         },
         text,
       };
@@ -219,16 +237,32 @@ export default function Chat({ navigation }) {
 
   function renderLoading() {
     return (
-      <View style={styles.centerCenter}>
+      <View style={styles.centerCenterColumn}>
         <Loader size={30} />
         <Type>Connecting...</Type>
       </View>
     );
   }
-  const goToSettings = useCallback(() => {
-    navigation.navigate("settings");
-  }, [navigation]);
 
+  function renderNotLoggedIn() {
+    return (
+      <View style={styles.centerBetweenRow}>
+        <Button onPress={goToAuth}>Start</Button>
+        <Button onPress={goToSignInWithPhone}>Login</Button>
+      </View>
+    );
+  }
+
+  const goToSettings = useCallback(() => {
+    user.displayName && navigation.navigate("settings");
+  }, [navigation, user]);
+
+  const goToAuth = () => {
+    navigation.navigate("auth");
+  };
+  const goToSignInWithPhone = () => {
+    navigation.navigate("linkPhone");
+  };
   return (
     <Screen style={{ justifyContent: "flex-end" }}>
       <Header onPress={goToSettings} topIcon={"filter-sharp"} />
@@ -238,9 +272,9 @@ export default function Chat({ navigation }) {
             messages={messages}
             onSend={onSend}
             user={{
-              _id: user.id,
-              name: user.name || "",
-              avatar: user.avatar,
+              _id: user.uid,
+              name: user.displayName || "",
+              avatar: user.photoURL,
             }}
             ref={(ref) => (giftedChatRef.current = ref)}
             renderMessage={renderMessage}
@@ -256,20 +290,29 @@ export default function Chat({ navigation }) {
           />
         </View>
       )}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "position" : "height"}
-      >
-        {renderComposer()}
-      </KeyboardAvoidingView>
+      {user?.displayName ? (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "position" : "height"}
+        >
+          {renderComposer()}
+        </KeyboardAvoidingView>
+      ) : (
+        renderNotLoggedIn()
+      )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  centerCenter: {
+  centerCenterColumn: {
     flex: 1,
     flexDirection: "column",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  centerBetweenRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
   paddingForHeader: { paddingTop: 25, flexGrow: 1 },
