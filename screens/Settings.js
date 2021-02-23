@@ -15,6 +15,8 @@ import {
   ScrollView,
   Pressable,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Portal } from "@gorhom/portal";
 import Screen from "../components/Screen";
 import Type from "../components/Type";
 import IconButton from "../components/IconButton";
@@ -22,19 +24,17 @@ import Input from "../components/Input";
 import SmallType from "../components/SmallType";
 import Button from "../components/Button";
 import { defaultTheme } from "../utils/theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomSheet, { BottomContext } from "../components/BottomSheet";
-import { Portal } from "@gorhom/portal";
 import { userIconList } from "../utils/user-icon-list";
 import firebase from "../utils/firebase";
 import Header from "../components/Header";
-// import { TriangleColorPicker, fromHsv } from "react-native-color-picker";
 import ColorPicker from "react-native-wheel-color-picker";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Settings({ navigation }) {
-  const [user, setUser] = useGlobal("user");
   const [showColorModal, setShowColorModal] = useState(false);
   const [showIconModal, setShowIconModal] = useState(false);
+  const [user] = useAuthState(firebase.auth());
 
   function goToColorSettings() {
     setShowColorModal(true);
@@ -56,37 +56,71 @@ export default function Settings({ navigation }) {
     navigation.goBack();
   }
 
+  function goToLinkAccount() {
+    navigation.navigate("linkPhone");
+  }
+
+  function signOut() {
+    firebase.auth().signOut();
+    navigation.navigate("chat");
+  }
+  // TODO: refactor these
+  function renderIconPortal() {
+    return (
+      <Portal>
+        <Modal transparent visible={showIconModal}>
+          <BottomSheet closeModal={closeIconModal}>
+            <IconSettings closeIconModal={closeIconModal} />
+          </BottomSheet>
+        </Modal>
+      </Portal>
+    );
+  }
+  function renderColorPortal() {
+    return (
+      <Portal>
+        <Modal transparent visible={showColorModal}>
+          <BottomSheet closeModal={closeColorModal}>
+            <ColorSettings />
+          </BottomSheet>
+        </Modal>
+      </Portal>
+    );
+  }
   return (
     <Screen style={styles.wrapper}>
       <Header onPress={goBack} topIcon={"chevron-back-sharp"} />
       <View style={[styles.wrapper, styles.paddingForHeader]}>
-        <Type style={{ fontSize: 25, marginBottom: 20, marginTop: 35 }}>
+        <Type style={{ marginBottom: 20, marginTop: 35 }} h1>
           Settings
         </Type>
-
-        <Type style={{ fontSize: 18 }}>User Icon:</Type>
-        <IconButton
-          name={user.avatar}
-          size={60}
-          containerStyle={styles.marginBottom}
-          onPress={goToIconSettings}
-        />
-        <Portal>
-          <Modal transparent visible={showIconModal}>
-            <BottomSheet closeModal={closeIconModal}>
-              <IconSettings closeIconModal={closeIconModal} />
-            </BottomSheet>
-          </Modal>
-        </Portal>
-        <Type style={{ fontSize: 18 }}>Theme Color:</Type>
-        <Button onPress={goToColorSettings}>EDIT COLOR</Button>
-        <Portal>
-          <Modal transparent visible={showColorModal}>
-            <BottomSheet closeModal={closeColorModal}>
-              <ColorSettings />
-            </BottomSheet>
-          </Modal>
-        </Portal>
+        <View style={styles.sectionWrapper}>
+          <Type h2>User Icon:</Type>
+          <IconButton
+            name={user.photoURL}
+            size={60}
+            containerStyle={styles.marginBottom}
+            onPress={goToIconSettings}
+          />
+          {renderIconPortal()}
+        </View>
+        <View style={styles.sectionWrapper}>
+          <Type h2>Theme Color:</Type>
+          <Button onPress={goToColorSettings}>EDIT COLOR</Button>
+          {renderColorPortal()}
+        </View>
+        <View style={styles.sectionWrapper}>
+          <Type h2>Verify Account:</Type>
+          <Type>
+            Link your anonymous account with your phone number to make sure your
+            settings are saved. Your information will still be private!
+          </Type>
+          <Button onPress={goToLinkAccount}>Link Account</Button>
+        </View>
+        <View style={styles.sectionWrapper}>
+          <Type h2>Sign Out</Type>
+          <Button onPress={signOut}>Sign Out</Button>
+        </View>
       </View>
     </Screen>
   );
@@ -160,10 +194,12 @@ export function ColorSettings() {
 }
 
 export function IconSettings({ closeIconModal }) {
-  const [user, setUser] = useGlobal("user");
+  const [user] = useAuthState(firebase.auth());
 
-  const updateIcon = useCallback((icon) => {
-    setUser({ ...user, avatar: icon });
+  const updateIcon = useCallback(async (icon) => {
+    await user.updateProfile({
+      photoURL: icon,
+    });
     closeIconModal();
   });
 
@@ -175,7 +211,7 @@ export function IconSettings({ closeIconModal }) {
             key={icon}
             icon={icon}
             onPress={updateIcon}
-            isSelected={icon === user.avatar}
+            isSelected={icon === user.photoURL}
           />
         ))}
       </ScrollView>
@@ -217,4 +253,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   paddingForHeader: { paddingTop: 25 },
+  sectionWrapper: {
+    marginBottom: 25,
+  },
 });

@@ -5,14 +5,26 @@ export default function Type({
   children,
   style = {},
   lightMode = false,
+  h1 = false,
+  h2 = false,
   ...props
 }) {
   const [theme] = useGlobal("theme");
   const colorStyles = {
     color: lightMode ? theme.dark : theme.accent,
   };
+
   return (
-    <Text style={[styles.text, colorStyles, style]} {...props}>
+    <Text
+      style={[
+        styles.text,
+        colorStyles,
+        style,
+        h1 ? { fontSize: 18 } : {},
+        h2 ? { fontSize: 25 } : {},
+      ]}
+      {...props}
+    >
       {children}
     </Text>
   );

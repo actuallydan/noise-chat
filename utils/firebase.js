@@ -3,7 +3,7 @@ import "firebase/auth";
 import "@firebase/firestore";
 
 // init firebase
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: process.env.API_KEY,
   authDomain: process.env.AUTH_DOMAIN,
   databaseURL: process.env.DB_URL,
