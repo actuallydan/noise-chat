@@ -32,7 +32,6 @@ export default function Chat({ navigation }) {
 
   // user returned from hook is read-only so that's why we need this bass-ackwards pageantry mis-direction
   const [firebaseUser] = useAuthState(firebase.auth());
-  console.log(firebaseUser);
 
   let user = null;
   // if the user isn't logged in, give the app some default data

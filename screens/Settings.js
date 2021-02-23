@@ -34,7 +34,19 @@ import { useAuthState } from "react-firebase-hooks/auth";
 export default function Settings({ navigation }) {
   const [showColorModal, setShowColorModal] = useState(false);
   const [showIconModal, setShowIconModal] = useState(false);
-  const [user] = useAuthState(firebase.auth());
+  const [firebaseUser] = useAuthState(firebase.auth());
+
+  let user = null;
+  // if the user isn't logged in, give the app some default data
+  if (!firebaseUser) {
+    user = {
+      displayName: "",
+      photoURL: "person-circle-sharp",
+      uid: "",
+    };
+  } else {
+    user = firebaseUser;
+  }
 
   function goToColorSettings() {
     setShowColorModal(true);
@@ -87,11 +99,12 @@ export default function Settings({ navigation }) {
       </Portal>
     );
   }
+
   return (
     <Screen style={styles.wrapper}>
       <Header onPress={goBack} topIcon={"chevron-back-sharp"} />
       <View style={[styles.wrapper, styles.paddingForHeader]}>
-        <Type style={{ marginBottom: 20, marginTop: 35 }} h1>
+        <Type h1 style={{ marginBottom: 20, marginTop: 35 }} h1>
           Settings
         </Type>
         <View style={styles.sectionWrapper}>
@@ -109,14 +122,16 @@ export default function Settings({ navigation }) {
           <Button onPress={goToColorSettings}>EDIT COLOR</Button>
           {renderColorPortal()}
         </View>
-        <View style={styles.sectionWrapper}>
-          <Type h2>Verify Account:</Type>
-          <Type>
-            Link your anonymous account with your phone number to make sure your
-            settings are saved. Your information will still be private!
-          </Type>
-          <Button onPress={goToLinkAccount}>Link Account</Button>
-        </View>
+        {user.isAnonymous && (
+          <View style={styles.sectionWrapper}>
+            <Type h2>Verify Account:</Type>
+            <Type>
+              Link your anonymous account with your phone number to make sure
+              your settings are saved. Your information will still be private!
+            </Type>
+            <Button onPress={goToLinkAccount}>Link Account</Button>
+          </View>
+        )}
         <View style={styles.sectionWrapper}>
           <Type h2>Sign Out</Type>
           <Button onPress={signOut}>Sign Out</Button>

@@ -74,5 +74,6 @@ const styles = StyleSheet.create({
     marginRight: 5,
     maxHeight: 120,
     alignItems: "flex-start",
+    fontSize: 16,
   },
 });

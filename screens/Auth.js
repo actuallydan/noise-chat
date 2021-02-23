@@ -22,24 +22,6 @@ export default function Auth({ navigation }) {
           reject(error);
         });
     });
-    // The FirebaseRecaptchaVerifierModal ref implements the
-    // FirebaseAuthApplicationVerifier interface and can be
-    // passed directly to `verifyPhoneNumber`.
-    // try {
-    //   const phoneProvider = new firebase.auth.PhoneAuthProvider();
-    //   const verificationId = await phoneProvider.verifyPhoneNumber(
-    //     "+17177936991",
-    //     firebaseRef.current
-    //   );
-    //   // setVerificationId(verificationId);
-    //   // showMessage({
-    //   //   text: "Verification code has been sent to your phone.",
-    //   // });
-    //   console.log("id", verificationId);
-    //   setVerificationId(verificationId);
-    // } catch (err) {
-    //   console.log({ text: `Error: ${err.message}`, color: "red" });
-    // }
   }
 
   async function init() {
@@ -51,10 +33,8 @@ export default function Auth({ navigation }) {
   }
 
   useEffect(() => {
-    // firebase.auth().currentUser && firebase.auth().signOut();
     init();
     firebase.auth().onAuthStateChanged(async function (user) {
-      console.log("auth user", user);
       if (user) {
         if (!user.photoURL) {
           await user.updateProfile({
@@ -67,24 +47,11 @@ export default function Auth({ navigation }) {
             displayName: randomName(),
           });
         }
-        // // User is signed in.
-        // const uid = user.uid;
-        // const name = randomName();
 
-        // setUser(
-        //   {
-        //     id: uid,
-        //     name,
-        //     avatar: getRandomIcon(),
-        //   },
-        //   () => {
         navigation.dispatch(StackActions.replace("chat"));
-        // }
-        // );
       } else {
-        // User is signed out.
-        // Go back to pre-login
-        setUser(null);
+        // User is signed out
+        // Not sure what to do here?
       }
     });
   }, []);

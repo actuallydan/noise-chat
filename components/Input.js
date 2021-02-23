@@ -66,5 +66,6 @@ const styles = StyleSheet.create({
     fontFamily: "Atkinson-Hyperlegible",
     padding: 5,
     flexGrow: 1,
+    fontSize: 16,
   },
 });

@@ -20,8 +20,8 @@ export default function Type({
         styles.text,
         colorStyles,
         style,
-        h1 ? { fontSize: 18 } : {},
-        h2 ? { fontSize: 25 } : {},
+        h1 ? { fontSize: 25 } : {},
+        h2 ? { fontSize: 18 } : {},
       ]}
       {...props}
     >
@@ -34,5 +34,6 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: "Atkinson-Hyperlegible",
     marginVertical: 2,
+    fontSize: 16,
   },
 });

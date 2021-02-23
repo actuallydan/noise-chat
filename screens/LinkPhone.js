@@ -13,10 +13,12 @@ import Input from "../components/Input";
 import Type from "../components/Type";
 import Button from "../components/Button";
 import Header from "../components/Header";
+import Loader from "../components/Loader";
 
 import firebase, { firebaseConfig } from "../utils/firebase";
 import randomName from "../utils/getRandomName";
 import { getRandomIcon } from "../utils/user-icon-list";
+import { useEffect } from "reactn";
 
 const auth = firebase.auth();
 
@@ -25,9 +27,16 @@ export default function LinkPhone({ navigation, ...props }) {
   const [verificationId, setVerificationId] = useState("");
   const [phone, setPhone] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const [user] = useAuthState(auth);
 
   const getPhoneCode = async () => {
+    setLoading(true);
+    // TODO:
+    // Validate phone number
+
     // The FirebaseRecaptchaVerifierModal ref implements the
     // FirebaseAuthApplicationVerifier interface and can be
     // passed directly to `verifyPhoneNumber`.
@@ -39,23 +48,23 @@ export default function LinkPhone({ navigation, ...props }) {
       );
 
       setVerificationId(verificationId);
+      setError("");
     } catch (err) {
       console.error(err);
+      setError(
+        "Please enter a valid phone number; be sure to include the '+', country code, and area code. Example: +15550001234"
+      );
     }
+    setLoading(false);
   };
+
   const tryToLink = async () => {
+    setLoading(true);
     try {
       const credential = firebase.auth.PhoneAuthProvider.credential(
         verificationId,
         verificationCode.substring(0, 6)
       );
-      // convert existing user to credentialed user
-      // console.log(
-      //   "current user photo and such",
-      //   user.photoURL,
-      //   user.displayName,
-      //   user.phoneNumber
-      // );
 
       if (user) {
         await user.linkWithCredential(credential);
@@ -75,16 +84,22 @@ export default function LinkPhone({ navigation, ...props }) {
           });
         }
       }
-      console.log("Phone authentication successful 👍");
-      // link current username and icon with user
-      // console.log("firebase user?", firebase.auth().currentUser);
-      console.log("hook user?", firebase.auth().currentUser);
+
+      setError("");
 
       navigation.dispatch(StackActions.replace("chat"));
     } catch (err) {
-      console.log(`Error: ${err.message}`);
+      console.error(`Error: ${err.message}`);
+      setError(err.message);
     }
+    setLoading(false);
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setError("");
+    }, 3000);
+  }, [error]);
 
   const renderStep1 = () => (
     <>
@@ -100,9 +115,14 @@ A text message with a confirmation code will be sent to your phone.
         autoCompleteType={"tel"}
       />
 
-      <Button onPress={getPhoneCode} disabled={!phone.trim()}>
-        Link
-      </Button>
+      {loading ? (
+        <Loader />
+      ) : (
+        <Button onPress={getPhoneCode} disabled={!phone.trim()}>
+          Link
+        </Button>
+      )}
+      {error ? <Type>{error}</Type> : null}
     </>
   );
   const renderStep2 = () => (
@@ -118,9 +138,14 @@ By pressing "Pair", you'll link your current activity to your number and you can
         keyboardType={"phone-pad"}
       />
 
-      <Button disabled={!verificationCode.trim()} onPress={tryToLink}>
-        Pair
-      </Button>
+      {loading ? (
+        <Loader />
+      ) : (
+        <Button disabled={!verificationCode.trim()} onPress={tryToLink}>
+          Pair
+        </Button>
+      )}
+      {error ? <Type>{error}</Type> : null}
     </>
   );
 
