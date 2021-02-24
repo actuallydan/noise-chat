@@ -98,6 +98,9 @@ export default function Chat({ navigation }) {
 
     // The return value should be an array of unsubscribe functions
     const unsubs = arrOfLocs.map((loc) => {
+      setMessages([]);
+      setMessagesObj({});
+
       return firebase
         .firestore()
         .collection(`/messages/${loc}/list`)
@@ -276,9 +279,11 @@ export default function Chat({ navigation }) {
   const goToAuth = () => {
     navigation.navigate("auth");
   };
+
   const goToSignInWithPhone = () => {
     navigation.navigate("linkPhone");
   };
+
   return (
     <Screen style={{ justifyContent: "flex-end" }}>
       <Header onPress={goToSettings} topIcon={"filter-sharp"} />
