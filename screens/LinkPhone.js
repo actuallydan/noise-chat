@@ -1,10 +1,7 @@
 import React, { useState, useRef } from "react";
 import { View, StyleSheet } from "react-native";
 
-import {
-  FirebaseRecaptchaVerifierModal,
-  FirebaseRecaptchaBanner,
-} from "expo-firebase-recaptcha";
+import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { StackActions } from "@react-navigation/native";
 
@@ -21,6 +18,7 @@ import { getRandomIcon } from "../utils/user-icon-list";
 import { useEffect } from "reactn";
 
 const auth = firebase.auth();
+// import { ErrorBoundary } from "react-error-boundary";
 
 export default function LinkPhone({ navigation, ...props }) {
   const firebaseRef = useRef(null);
@@ -129,6 +127,7 @@ A text message with a confirmation code will be sent to your phone.
     <>
       <Type>{`
 Enter the verification code you received on your phone.
+
 By pressing "Pair", you'll link your current activity to your number and you can sign in with your phone number in the future.
       `}</Type>
       <Input
@@ -153,6 +152,17 @@ By pressing "Pair", you'll link your current activity to your number and you can
     navigation.goBack();
   };
 
+  // function ErrorFallback({ error, resetErrorBoundary }) {
+  //   console.error(error);
+  //   return (
+  //     <FirebaseRecaptchaVerifierModal
+  //       ref={firebaseRef}
+  //       firebaseConfig={firebaseConfig}
+  //       attemptInvisibleVerification={false}
+  //     />
+  //   );
+  // }
+
   return (
     <Screen>
       <Header onPress={goBack} topIcon={"close"} />
@@ -161,16 +171,25 @@ By pressing "Pair", you'll link your current activity to your number and you can
         <Type h1>Link With Phone</Type>
 
         {verificationId ? renderStep2() : renderStep1()}
+        {/* <ErrorBoundary
+          FallbackComponent={ErrorFallback}
+          onReset={() => {
+            // reset the state of your app so the error doesn't happen again
+            console.error("it broke yall");
+          }}
+          onError={console.log}
+        > */}
         <FirebaseRecaptchaVerifierModal
           ref={firebaseRef}
           firebaseConfig={firebaseConfig}
-          attemptInvisibleVerification={true}
+          attemptInvisibleVerification={false}
         />
+        {/* </ErrorBoundary> */}
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  paddingForHeader: { paddingTop: 50 },
+  paddingForHeader: { paddingTop: 60 },
 });

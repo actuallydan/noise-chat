@@ -2,7 +2,7 @@ import React, { useState, useGlobal } from "reactn";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function Input({ lightMode, ...props }) {
+export default function Input({ lightMode, onPress = null, ...props }) {
   const [theme] = useGlobal("theme");
   const [isFocused, setIsFocused] = useState(false);
 
@@ -33,7 +33,12 @@ export default function Input({ lightMode, ...props }) {
     : theme.accent + "99";
 
   return (
-    <TouchableOpacity accessible={false} onFocus={onFocus} onBlur={onBlur}>
+    <TouchableOpacity
+      accessible={false}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      onPress={onPress}
+    >
       <View style={[styles.viewStyle, viewStyle]}>
         <Ionicons name="caret-forward-sharp" size={20} color={color} />
 

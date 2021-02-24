@@ -21,7 +21,14 @@ export default function Type({
         colorStyles,
         style,
         h1 ? { fontSize: 25 } : {},
-        h2 ? { fontSize: 18 } : {},
+        h2
+          ? {
+              fontSize: 18,
+              textTransform: "uppercase",
+              letterSpacing: 2,
+              marginBottom: 10,
+            }
+          : {},
       ]}
       {...props}
     >

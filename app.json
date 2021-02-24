@@ -15,12 +15,17 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "web": {
       "favicon": "./assets/noise-logo-bg.png"
+    },
+    "android": {
+      "package": "chat.choir.noise"
     }
   }
 }

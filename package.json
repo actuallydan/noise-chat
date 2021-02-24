@@ -36,6 +36,7 @@
     "prop-types": "^15.7.2",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-error-boundary": "^3.1.0",
     "react-firebase-hooks": "^2.2.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-40.0.1.tar.gz",
     "react-native-gesture-handler": "~1.8.0",
@@ -47,7 +48,8 @@
     "react-native-webview": "11.0.0",
     "react-native-wheel-color-picker": "^1.0.2",
     "reactn": "^2.2.7",
-    "reanimated-bottom-sheet": "^1.0.0-alpha.22"
+    "reanimated-bottom-sheet": "^1.0.0-alpha.22",
+    "expo-clipboard": "~1.0.1"
   },
   "devDependencies": {
     "react-native-web": "~0.13.12",

@@ -32,6 +32,7 @@ setGlobal({
   location: null,
   theme: defaultTheme,
   locationPermissionAllowed: true,
+  shouldUseCurrentLocation: true,
 });
 
 if (process.env.NODE_ENV !== "production") {
@@ -44,6 +45,10 @@ export default function App() {
   const [locationPermissionAllowed, setLocationPermissionsAllowed] = useGlobal(
     "locationPermissionAllowed"
   );
+  const [shouldUseCurrentLocation, seShouldUseCurrentLocation] = useGlobal(
+    "shouldUseCurrentLocation"
+  );
+
   const [location, setLocation] = useGlobal("location");
   const [theme, setTheme] = useGlobal("theme");
   const [appReady, setAppReady] = useState(false);
@@ -112,14 +117,14 @@ export default function App() {
 
   // set up app to listen to location if allowed
   useEffect(() => {
-    if (locationPermissionAllowed) {
+    if (locationPermissionAllowed && shouldUseCurrentLocation) {
       watchLocation();
     }
 
     return () => {
       locationRef.current.remove();
     };
-  }, [locationPermissionAllowed]);
+  }, [locationPermissionAllowed, shouldUseCurrentLocation]);
 
   // on browser resize, or in the bizarre case of the app resizing on a tablet or some nonsense
   const resize = ({ window }) => {

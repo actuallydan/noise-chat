@@ -23,6 +23,7 @@ import BigInput from "../components/BigInput";
 
 import { useAuthState } from "react-firebase-hooks/auth";
 import Button from "../components/Button";
+import LocationHeader from "../components/LocationHeader";
 
 const LINE_HEIGHT = 25;
 
@@ -235,11 +236,26 @@ export default function Chat({ navigation }) {
     );
   }
 
-  function renderLoading() {
+  function renderLoading(loadingText = "Connecting...") {
     return (
       <View style={styles.centerCenterColumn}>
         <Loader size={30} />
-        <Type>Connecting...</Type>
+        <Type>{loadingText}</Type>
+      </View>
+    );
+  }
+
+  function renderChatEmpty() {
+    return (
+      <View style={[styles.centerCenterColumn, styles.flexGrow1]}>
+        <IconButton
+          name={"chatbubble-ellipses-sharp"}
+          size={45}
+          border={false}
+        />
+        <Type style={{ textAlign: "center" }}>
+          Looks like there aren't any messages around you...yet.
+        </Type>
       </View>
     );
   }
@@ -266,8 +282,13 @@ export default function Chat({ navigation }) {
   return (
     <Screen style={{ justifyContent: "flex-end" }}>
       <Header onPress={goToSettings} topIcon={"filter-sharp"} />
-      {location && user && (
-        <View style={{ flexGrow: 1 }}>
+      <LocationHeader locationID={latLongID} onPress={goToSettings} />
+      {!location ? (
+        renderLoading("Getting your location...")
+      ) : messages.length === 0 ? (
+        renderChatEmpty()
+      ) : (
+        <View style={styles.flexGrow1}>
           <GiftedChat
             messages={messages}
             onSend={onSend}
@@ -310,6 +331,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  flexGrow1: { flexGrow: 1 },
   centerBetweenRow: {
     flexDirection: "row",
     justifyContent: "space-between",

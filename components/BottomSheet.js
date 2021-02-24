@@ -18,7 +18,11 @@ export const BottomContext = createContext({
   setScrollable: () => {},
 });
 
-export default function BottomDrawer({ children, closeModal }) {
+export default function BottomDrawer({
+  children,
+  closeModal,
+  drawerStyles = {},
+}) {
   const [theme] = useGlobal("theme");
   const bottomDrawerRef = useRef(null);
   const [scrollable, setScrollable] = useState(true);
@@ -36,6 +40,7 @@ export default function BottomDrawer({ children, closeModal }) {
   const modalSheetStyle = {
     padding: 15,
     backgroundColor: theme.dark,
+    ...drawerStyles,
   };
   return (
     <View flex={1}>
