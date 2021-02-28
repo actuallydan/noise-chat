@@ -2,30 +2,34 @@
   "expo": {
     "name": "noise",
     "slug": "noise",
+    "privacy": "public",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/noise-logo-bg.png",
+    "icon": "./assets/noise-bg-512.png",
     "backgroundColor": "#2B283E",
     "primaryColor": "#2B283E",
     "splash": {
-      "image": "./assets/noise-logo.png",
+      "image": "./assets/noise-1024.png",
       "resizeMode": "contain",
       "backgroundColor": "#2B283E"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
     "web": {
-      "favicon": "./assets/noise-logo-bg.png"
+      "favicon": "./assets/noise-rounded-64.png"
     },
     "android": {
-      "package": "chat.choir.noise"
+      "package": "chat.choir.noise",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/noise-1024.png",
+        "backgroundColor": "#2B283E"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     }
   }
 }
