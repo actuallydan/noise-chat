@@ -1,9 +1,12 @@
 import React, { useGlobal } from "reactn";
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
+import IconButton from "../components/IconButton";
 
 export default function Button({
   lightMode,
   onPress = () => {},
+  withIcon = null,
+  uppercase = true,
   children,
   ...props
 }) {
@@ -19,10 +22,18 @@ export default function Button({
     color: lightMode ? theme.dark : theme.accent,
   };
 
-  const text = children.toUpperCase();
+  const text = uppercase ? children.toUpperCase() : children;
   return (
     <TouchableOpacity onPress={onPress} {...props}>
       <View style={[styles.viewStyle, viewStyle]}>
+        {withIcon && (
+          <IconButton
+            lightMode={lightMode}
+            name={withIcon}
+            size={35}
+            border={false}
+          />
+        )}
         <Text style={[styles.textStyle, textStyle]} color={color}>
           {text}
         </Text>
@@ -37,6 +48,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderRadius: 10,
     padding: 8,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },

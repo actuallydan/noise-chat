@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "reactn";
 
-import { StyleSheet, View, Dimensions, Platform, LogBox } from "react-native";
+import { StyleSheet, View, Dimensions, Platform } from "react-native";
 import * as Location from "expo-location";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,8 +35,9 @@ setGlobal({
   shouldUseCurrentLocation: true,
 });
 
-if (process.env.NODE_ENV !== "production") {
-  Platform.OS !== "web" && LogBox.ignoreLogs(["Setting a timer"]);
+if (process.env.NODE_ENV !== "production" && Platform.OS !== "web") {
+  const { LogBox } = require("react-native");
+  LogBox.ignoreLogs(["Setting a timer"]);
 }
 
 export default function App() {
