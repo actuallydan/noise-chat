@@ -33,7 +33,7 @@ setGlobal({
 
 export default function App() {
   const [theme, setTheme] = useGlobal("theme");
-  const [width, setWidth] = useState(window.innerWidth);
+  const [width, setWidth] = useState(0);
 
   const [loaded] = useFonts({
     "Atkinson-Hyperlegible": { uri: Atkinson },
