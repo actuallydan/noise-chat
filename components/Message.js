@@ -74,7 +74,11 @@ const Message = ({ currentMessage, previousMessage = {}, ...props }) => {
             </View>
           )}
           {emojiUtils.isPureEmojiString(currentMessage.text) ? (
-            <Text style={{ fontSize: 45 }}>{currentMessage.text}</Text>
+            <Text
+              style={{ fontSize: 45, textAlign: isMine ? "right" : "left" }}
+            >
+              {currentMessage.text}
+            </Text>
           ) : (
             <Card lightMode={isMine}>
               <Type lightMode={isMine}>{currentMessage.text}</Type>

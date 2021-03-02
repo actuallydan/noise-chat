@@ -1,6 +1,6 @@
 import React, { useGlobal } from "reactn";
 
-import { View, StyleSheet, Modal } from "react-native";
+import { View, StyleSheet, Modal, ScrollView } from "react-native";
 import { Portal } from "@gorhom/portal";
 import Screen from "../../components/Screen";
 import Type from "../../components/Type";
@@ -123,7 +123,9 @@ export default function Settings({ navigation }) {
   return (
     <Screen style={styles.wrapper}>
       <Header onPress={goBack} topIcon={"chevron-back-sharp"} />
-      <View style={[styles.wrapper, styles.paddingForHeader]}>
+      <ScrollView
+        contentContainerStyle={[styles.wrapper, styles.paddingForHeader]}
+      >
         <Type h1 style={{ marginBottom: 20, marginTop: 35 }} h1>
           Settings
         </Type>
@@ -180,7 +182,7 @@ export default function Settings({ navigation }) {
             Sign Out
           </Button>
         </View>
-      </View>
+      </ScrollView>
     </Screen>
   );
 }
@@ -194,7 +196,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   wrapper: {
-    flex: 1,
     justifyContent: "flex-start",
     alignItems: "stretch",
   },

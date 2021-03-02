@@ -13,7 +13,11 @@ export const firebaseConfig = {
   appId: process.env.APP_ID,
 };
 
-firebase.initializeApp(firebaseConfig);
+// prevent app from trying to re-init when importing into mulitple components
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 firebase.auth().useDeviceLanguage();
 
 export default firebase;
