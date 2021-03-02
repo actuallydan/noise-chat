@@ -3,7 +3,7 @@
     "name": "noise",
     "slug": "noise",
     "privacy": "public",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/noise-bg-512.png",
     "backgroundColor": "#2B283E",
