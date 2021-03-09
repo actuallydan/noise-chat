@@ -45,6 +45,7 @@ export default function App() {
       setWidth(window.innerWidth);
     };
 
+    changeSize();
     window.addEventListener("resize", changeSize, { passive: true });
 
     return () => {
@@ -98,6 +99,18 @@ export default function App() {
     width: "200px",
   };
 
+  const openAndroid = () => {
+    window.open(
+      "https://play.google.com/store/apps/details?id=chat.choir.noise",
+      "_blank"
+    );
+  };
+
+  const fullscreenScroll =
+    width > 1000
+      ? { width: "100%", maxWidth: "1200", justifyContent: "space-evenly" }
+      : {};
+
   return (
     <SafeAreaProvider>
       <Screen
@@ -129,17 +142,31 @@ export default function App() {
             </Button>
           )}
         </View>
-        <Type
+        <View
           style={{
-            marginVertical: 20,
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "space-around",
+            width: "100%",
           }}
         >
-          Coming Soon to iOS and Android
-        </Type>
+          <Button
+            onPress={openAndroid}
+            lightMode
+            withIcon={"logo-google-playstore"}
+          >
+            Play Store
+          </Button>
+          <Button disabled withIcon={"logo-apple-appstore"} uppercase={false}>
+            Coming Soon
+          </Button>
+        </View>
         <ScrollView
           horizontal
           style={{ width: "100%", padding: 20 }}
-          contentContainerStyle={{ alignItems: "space-around" }}
+          contentContainerStyle={{
+            alignItems: "space-around",
+            ...fullscreenScroll,
+          }}
           snapToInterval={1}
           indicatorStyle={"white"}
           centerContent

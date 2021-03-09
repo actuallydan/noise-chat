@@ -3,7 +3,7 @@
     "name": "noise",
     "slug": "noise",
     "privacy": "public",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/noise-bg-512.png",
     "backgroundColor": "#2B283E",
@@ -25,6 +25,7 @@
     },
     "android": {
       "package": "chat.choir.noise",
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/noise-1024.png",
         "backgroundColor": "#2B283E"
