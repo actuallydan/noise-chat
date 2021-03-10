@@ -9,6 +9,8 @@ import React, {
 import { StyleSheet, View, Dimensions, Platform } from "react-native";
 import * as Location from "expo-location";
 import { useFonts } from "expo-font";
+import * as Updates from "expo-updates";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -24,6 +26,8 @@ import Auth from "./screens/Auth";
 import Settings from "./screens/Settings";
 import LocationError from "./screens/LocationError";
 import LinkPhone from "./screens/LinkPhone";
+import MapLoaderBg from "./components/MapLoaderBg";
+import LoadingScreen from "./components/LoadingScreen";
 
 import { PortalHost } from "@gorhom/portal";
 
@@ -33,6 +37,7 @@ setGlobal({
   theme: defaultTheme,
   locationPermissionAllowed: true,
   shouldUseCurrentLocation: true,
+  shouldLoop: false,
 });
 
 if (process.env.NODE_ENV !== "production" && Platform.OS !== "web") {
@@ -46,14 +51,16 @@ export default function App() {
   const [locationPermissionAllowed, setLocationPermissionsAllowed] = useGlobal(
     "locationPermissionAllowed"
   );
-  const [shouldUseCurrentLocation, seShouldUseCurrentLocation] = useGlobal(
+  const [shouldUseCurrentLocation, setShouldUseCurrentLocation] = useGlobal(
     "shouldUseCurrentLocation"
   );
 
   const [location, setLocation] = useGlobal("location");
+  const [shouldLoop] = useGlobal("shouldLoop");
   const [theme, setTheme] = useGlobal("theme");
+
   const [appReady, setAppReady] = useState(false);
-  const [, setDimensions] = useState({
+  const [dimensions, setDimensions] = useState({
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
   });
@@ -72,6 +79,16 @@ export default function App() {
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
     async function init() {
+      // OTA
+      if (process.env.NODE_ENV === "production") {
+        let { isAvailable } = await Updates.checkForUpdateAsync();
+
+        if (isAvailable) {
+          await Updates.reloadAsync();
+          return;
+        }
+      }
+
       const color = await AsyncStorage.getItem("accent-color");
       color && updateTheme(color);
     }
@@ -79,8 +96,8 @@ export default function App() {
     init();
 
     Dimensions.addEventListener("change", resize);
-
     setAppReady(true);
+
     return () => {
       Dimensions.removeEventListener("change", resize);
     };
@@ -144,11 +161,6 @@ export default function App() {
   };
 
   const containerStyle = [styles.container, { backgroundColor: theme.dark }];
-  if (!fontsLoaded || !appReady) {
-    return null;
-  }
-
-  // return <ExamplePhoneAuth />;
 
   if (errorMsg || !locationPermissionAllowed) {
     errorMsg && console.error(errorMsg);
@@ -159,29 +171,38 @@ export default function App() {
     );
   }
 
+  const shouldShowLoader = !fontsLoaded || !appReady || !location;
   // otherwise display app as normal
   return (
     <SafeAreaProvider>
       <NavigationContainer>
         <View style={containerStyle} onLayout={onRotate}>
-          <PortalHost>
-            <Stack.Navigator
-              initialRouteName="chat"
-              screenOptions={{
-                cardStyle: { backgroundColor: "transparent" },
-                cardOverlayEnabled: false,
-                headerShown: false,
-                ...TransitionPresets.ScaleFromCenterAndroid,
-              }}
-              headerMode={"none"}
-            >
-              <Stack.Screen name="auth" component={Auth} />
+          <MapLoaderBg
+            dimensions={dimensions}
+            shouldLoop={shouldLoop || shouldShowLoader}
+          />
+          {shouldShowLoader ? (
+            <LoadingScreen loadingText={""} />
+          ) : (
+            <PortalHost>
+              <Stack.Navigator
+                initialRouteName="chat"
+                screenOptions={{
+                  cardStyle: { backgroundColor: "transparent" },
+                  cardOverlayEnabled: false,
+                  headerShown: false,
+                  ...TransitionPresets.ScaleFromCenterAndroid,
+                }}
+                headerMode={"none"}
+              >
+                <Stack.Screen name="auth" component={Auth} />
 
-              <Stack.Screen name="chat" component={Chat} />
-              <Stack.Screen name="settings" component={Settings} />
-              <Stack.Screen name="linkPhone" component={LinkPhone} />
-            </Stack.Navigator>
-          </PortalHost>
+                <Stack.Screen name="chat" component={Chat} />
+                <Stack.Screen name="settings" component={Settings} />
+                <Stack.Screen name="linkPhone" component={LinkPhone} />
+              </Stack.Navigator>
+            </PortalHost>
+          )}
         </View>
       </NavigationContainer>
     </SafeAreaProvider>
